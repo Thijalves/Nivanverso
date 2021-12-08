@@ -1,12 +1,13 @@
 #include "raylib.h"
+#include <stdio.h>
 
-#define gravidade 400
+#define gravity 400
 
-typedef struct {
+typedef struct EnvItem {
     Rectangle rect;
     int blocking;
     Color color;
-} Chao;
+} EnvItem;
 
 typedef struct {
     Texture2D texture;
@@ -20,34 +21,60 @@ typedef struct {
     Vector2 position;
     Sprite idle;
     Sprite run;
+    Sprite runLeft;
+    float jumpS;
     float hSpeed;
     float vSpeed;
+    char canJump;
 } Player;
 
-void updatePlayer(Player *player, float deltaTime, int *estado){
+//Funcao pra atualizar as variaveis do player
+void updatePlayer(Player *player, float deltaTime, int *playerState, EnvItem *envItems, int envItemsLength){
 
     //atualiza o estado de animacao e o movimento horizonal
     if(IsKeyDown(KEY_D)){
-            player->position.x += player->hSpeed*deltaTime;
-            *estado = 1;
-            player->frame.width = (float)player->run.texture.width/player->run.maxFrames;
-            player->frame.height = (float)player->run.texture.height;
+        player->position.x += player->hSpeed*deltaTime;
+        *playerState = 1;
+        player->frame.width = (float)player->run.texture.width/player->run.maxFrames;
+        player->frame.height = (float)player->run.texture.height;
     }else if(IsKeyDown(KEY_A)){
         player->position.x -= player->hSpeed*deltaTime;
-        *estado = 1;
-        player->frame.width = -(float)player->run.texture.width/player->run.maxFrames;
-        player->frame.height = (float)player->run.texture.height;
+        *playerState = 2;
+        player->frame.width = (float)player->runLeft.texture.width/player->run.maxFrames;
+        player->frame.height = (float)player->runLeft.texture.height;
     }else{
-        *estado = 0;
+        *playerState = 0;
         player->frame.width = (float)player->idle.texture.width/player->idle.maxFrames;
         player->frame.height = (float)player->idle.texture.height;
     }
 
+    //detecta pulo
+    if (IsKeyDown(KEY_SPACE) && player->canJump){
+        player->vSpeed = -player->jumpS;
+        player->canJump = false;
+    }
+
     int hitObstacle = 0;
+    
+    //verifica as colisoes com cada obstaculo
+    for (int i = 0; i < envItemsLength; i++){
+        EnvItem *ei = envItems + i;
+        Vector2 *p = &(player->position);
+        if (ei->blocking && ei->rect.x <= p->x + 15 &&
+            ei->rect.x + ei->rect.width >= p->x - 15 &&
+            ei->rect.y >= p->y && ei->rect.y < p->y + player->vSpeed*deltaTime){
+                hitObstacle = 1;
+                player->vSpeed = 0.0f;
+                p->y = ei->rect.y;
+        }
+    }
 
-    /* player->position.y += player->vSpeed*deltaTime;
-    player->vSpeed += gravidade*deltaTime;  */
-
+    if (!hitObstacle){
+        player->position.y += player->vSpeed*deltaTime;
+        player->vSpeed += gravity*deltaTime;
+        player->canJump = false;
+    }else 
+        player->canJump = true;
 
 }
 
@@ -59,25 +86,21 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
 
-    //inicializa o chao
-    Chao chao = {0};
-    chao.rect.x = 300;
-    chao.rect.y = 260;
-    chao.rect.width = 200;
-    chao.rect.height = 5;
-    chao.color = GREEN;
-    //sombra
-    Chao sombra = {0};
-    sombra.rect.x = 302;
-    sombra.rect.y = 262;
-    sombra.rect.width = 200;
-    sombra.rect.height = 5;
-    sombra.color = DARKGRAY;
+    EnvItem envItems[] = {
+        {{ 0, 0, 1000, 400 }, 0, BLUE },
+        {{ 251, 301, 100, 10 }, 0, DARKGRAY},
+        {{ 250, 300, 100, 10 }, 1, GREEN },
+        {{ 401, 301, 100, 10 }, 0, DARKGRAY},
+        {{ 400, 300, 100, 10 }, 1, GREEN }
+    };
+
+    int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
 
     //instancia o player com a animacao idle
     Player player = {0};
     player.hSpeed = 125;
     player.vSpeed = 0;
+    player.jumpS = 250;
     player.idle.texture = LoadTexture("../resources/idle.png");
     player.idle.maxFrames = 12;
     player.position.x = screenWidth/2;
@@ -89,6 +112,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     //carrega a anumacao run
     player.run.texture = LoadTexture("../resources/run.png");
+    player.run.maxFrames = 8;
+
+    //animcao de correr para a esquerda
+    player.runLeft.texture = LoadTexture("../resources/runLeft.png");
     player.run.maxFrames = 8;
 
     float timer = 0;
@@ -109,7 +136,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
         int playerState = 0; // 0=idle 1=run 2 = runL
 
-        updatePlayer( &player, deltaTime, &playerState);
+        updatePlayer( &player, deltaTime, &playerState, envItems, envItemsLength);
 
         if(IsKeyPressed(KEY_R)){
             player.position.y = 0;
@@ -119,25 +146,33 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         BeginDrawing();
             BeginMode2D(camera);
 
-            ClearBackground(BLUE);
-            
-            DrawRectangleRec(sombra.rect, sombra.color);
-            DrawRectangleRec(chao.rect, chao.color);
+                ClearBackground(BLUE);
 
-            timer += GetFrameTime();
-            if(timer >= 0.075){
-                timer=0;
-                frame++;
-            }
+                for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //cria os obstaculos
 
-            frame = frame % player.idle.maxFrames;
-            player.frame.x = (player.frame.width *frame);
+                //conta os frames para animacao
+                timer += GetFrameTime();
+                if(timer >= 0.075){
+                    timer=0;
+                    frame++;
+                }
+                frame = frame % player.idle.maxFrames;
+                player.frame.x = (player.frame.width *frame);
 
-            if(playerState){
-                DrawTextureRec(player.run.texture, player.frame, player.position, WHITE);
-            }else{
-                DrawTextureRec(player.idle.texture, player.frame, player.position, WHITE);
-            }
+                Vector2 position = {player.position.x, player.position.y - 35}; //desenha o player com correcao de altura
+
+                //anima de acordo com o estado
+                switch(playerState){
+                    case 0: //boneco parado
+                        DrawTextureRec(player.idle.texture, player.frame,  position, WHITE);
+                        break;
+                    case 1: //andando p direita
+                        DrawTextureRec(player.run.texture, player.frame, position, WHITE);
+                        break;
+                    case 2: //andando p esquerda
+                        DrawTextureRec(player.runLeft.texture, player.frame, position, WHITE);
+                        break;
+                }
 
             EndMode2D();
         EndDrawing();
