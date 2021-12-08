@@ -20,6 +20,7 @@ typedef struct {
     Vector2 position;
     Sprite idle;
     Sprite run;
+    Sprite runLeft;
     float hSpeed;
     float vSpeed;
 } Player;
@@ -34,9 +35,9 @@ void updatePlayer(Player *player, float deltaTime, int *estado){
             player->frame.height = (float)player->run.texture.height;
     }else if(IsKeyDown(KEY_A)){
         player->position.x -= player->hSpeed*deltaTime;
-        *estado = 1;
-        player->frame.width = -(float)player->run.texture.width/player->run.maxFrames;
-        player->frame.height = (float)player->run.texture.height;
+        *estado = 2;
+        player->frame.width = (float)player->runLeft.texture.width/player->run.maxFrames;
+        player->frame.height = (float)player->runLeft.texture.height;
     }else{
         *estado = 0;
         player->frame.width = (float)player->idle.texture.width/player->idle.maxFrames;
@@ -91,6 +92,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     player.run.texture = LoadTexture("../resources/run.png");
     player.run.maxFrames = 8;
 
+    //animcao de correr para a esquerda
+    player.runLeft.texture = LoadTexture("../resources/runLeft.png");
+    player.run.maxFrames = 8;
+
     float timer = 0;
     int frame = 0;
 
@@ -133,10 +138,18 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             frame = frame % player.idle.maxFrames;
             player.frame.x = (player.frame.width *frame);
 
-            if(playerState){
-                DrawTextureRec(player.run.texture, player.frame, player.position, WHITE);
-            }else{
-                DrawTextureRec(player.idle.texture, player.frame, player.position, WHITE);
+
+            switch(playerState){
+                case 0: //boneco parado
+                    DrawTextureRec(player.idle.texture, player.frame, player.position, WHITE);
+                    break;
+                case 1: //andando p direita
+                    DrawTextureRec(player.run.texture, player.frame, player.position, WHITE);
+                    break;
+                case 2: //andando p esquerda
+                    DrawTextureRec(player.runLeft.texture, player.frame, player.position, WHITE);
+                    break;
+
             }
 
             EndMode2D();
