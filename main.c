@@ -3,6 +3,11 @@
 
 #define gravity 400
 
+/*
+    Tive um provblema pra colocar o sprite de caindo
+    A gt tenta resolver juntos dps :)
+*/
+
 typedef struct EnvItem {
     Rectangle rect;
     int blocking;
@@ -22,28 +27,31 @@ typedef struct {
     Sprite idle;
     Sprite run;
     Sprite runLeft;
+    Sprite jumping;
+    Sprite falling;
     float jumpS;
     float hSpeed;
     float vSpeed;
     char canJump;
+    int playerState; // 0=idle 1=run 2 = runL
 } Player;
 
 //Funcao pra atualizar as variaveis do player
-void updatePlayer(Player *player, float deltaTime, int *playerState, EnvItem *envItems, int envItemsLength){
+void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envItemsLength){
 
     //atualiza o estado de animacao e o movimento horizonal
     if(IsKeyDown(KEY_D)){
         player->position.x += player->hSpeed*deltaTime;
-        *playerState = 1;
+        player->playerState = 1;
         player->frame.width = (float)player->run.texture.width/player->run.maxFrames;
         player->frame.height = (float)player->run.texture.height;
     }else if(IsKeyDown(KEY_A)){
         player->position.x -= player->hSpeed*deltaTime;
-        *playerState = 2;
+        player->playerState = 2;
         player->frame.width = (float)player->runLeft.texture.width/player->run.maxFrames;
         player->frame.height = (float)player->runLeft.texture.height;
     }else{
-        *playerState = 0;
+        player->playerState = 0;
         player->frame.width = (float)player->idle.texture.width/player->idle.maxFrames;
         player->frame.height = (float)player->idle.texture.height;
     }
@@ -72,10 +80,49 @@ void updatePlayer(Player *player, float deltaTime, int *playerState, EnvItem *en
     if (!hitObstacle){
         player->position.y += player->vSpeed*deltaTime;
         player->vSpeed += gravity*deltaTime;
-        player->canJump = false;
-    }else 
-        player->canJump = true;
 
+        if(player->vSpeed < 0){ //player esta subindo
+            if(IsKeyDown(KEY_A))
+                player->playerState = 4;
+            else
+                player->playerState = 3;
+
+            player->frame.width = (float)player->jumping.texture.width;
+            player->frame.height = (float)player->jumping.texture.height;
+        } 
+
+        player->canJump = false;
+    }else{
+        player->canJump = true;
+    }
+
+}
+
+void drawPlayer(Player *player){
+    Rectangle frame = player->frame;
+    Vector2 position = {player->position.x, player->position.y - 35}; //desenha o player com correcao de altura
+
+    if(player->playerState == 4)
+        frame.width = -player->frame.width;
+
+    //anima de acordo com o estado
+    switch(player->playerState){
+        case 0: //boneco parado
+            DrawTextureRec(player->idle.texture, player->frame,  position, WHITE);
+            break;
+        case 1: //andando p direita
+            DrawTextureRec(player->run.texture, player->frame, position, WHITE);
+            break;
+        case 2: //andando p esquerda
+            DrawTextureRec(player->runLeft.texture, player->frame, position, WHITE);
+            break;
+        case 3: //pulando p direita
+            DrawTextureRec(player->jumping.texture, player->frame, position, WHITE);
+            break;
+        case 4: //pulando p direita
+            DrawTextureRec(player->jumping.texture, frame, position, WHITE);
+            break;
+    }
 }
 
 
@@ -114,9 +161,17 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     player.run.texture = LoadTexture("../resources/run.png");
     player.run.maxFrames = 8;
 
-    //animcao de correr para a esquerda
+    //animacao de correr para a esquerda
     player.runLeft.texture = LoadTexture("../resources/runLeft.png");
-    player.run.maxFrames = 8;
+    player.runLeft.maxFrames = 8;
+
+    //sprite pulando
+    player.jumping.texture = LoadTexture("../resources/jumping.png");
+    player.jumping.maxFrames = 1;
+
+    //sprite caindo
+    player.falling.texture = LoadTexture("../resources/falling.png");
+    player.falling.maxFrames = 1;
 
     float timer = 0;
     int frame = 0;
@@ -134,9 +189,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
         float deltaTime = GetFrameTime();
 
-        int playerState = 0; // 0=idle 1=run 2 = runL
 
-        updatePlayer( &player, deltaTime, &playerState, envItems, envItemsLength);
+        updatePlayer(&player, deltaTime, envItems, envItemsLength);
 
         if(IsKeyPressed(KEY_R)){
             player.position.y = 0;
@@ -159,20 +213,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 frame = frame % player.idle.maxFrames;
                 player.frame.x = (player.frame.width *frame);
 
-                Vector2 position = {player.position.x, player.position.y - 35}; //desenha o player com correcao de altura
-
-                //anima de acordo com o estado
-                switch(playerState){
-                    case 0: //boneco parado
-                        DrawTextureRec(player.idle.texture, player.frame,  position, WHITE);
-                        break;
-                    case 1: //andando p direita
-                        DrawTextureRec(player.run.texture, player.frame, position, WHITE);
-                        break;
-                    case 2: //andando p esquerda
-                        DrawTextureRec(player.runLeft.texture, player.frame, position, WHITE);
-                        break;
-                }
+                drawPlayer(&player);
 
             EndMode2D();
         EndDrawing();
@@ -181,6 +222,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     UnloadTexture(player.idle.texture);
     UnloadTexture(player.run.texture);
+    UnloadTexture(player.runLeft.texture);
+    UnloadTexture(player.falling.texture);
+    UnloadTexture(player.jumping.texture);
 
     CloseWindow();                
 
