@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #define gravity 400
-
 typedef struct EnvItem {
     Rectangle rect;
     int blocking;
@@ -50,23 +49,24 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
                 player->position.y = envItems[i].rect.y;
             }
         
-        if(envItems[i].rect.width == 50){
-            printf("Player: %f | plataforma: %f | subtracao: %f\n", player->position.x, envItems[i].rect.x, player->position.x-(envItems[i].rect.x+envItems[i].rect.width));
-        } 
+        /* if(envItems[i].rect.width == 50){
+            printf("Player: %f | plataforma: %f | subtracao: %f\n", player->position.x, envItems[i].rect.x, envItems[i].rect.x-(player->position.x+player->frame.width));
+        }  */
 
         //detecta colosioes laterais
         if (envItems[i].rect.y < player->position.y && //se o topo do obstaculo esta acima do p
             (player->position.y-player->frame.height)<envItems[i].rect.y+envItems[i].rect.height && //se o pe do obstaculo esta acima do p
             player->position.x > envItems[i].rect.x && //se o ostaculo esta a esquerda do p
-            player->position.x-(envItems[i].rect.x+envItems[i].rect.width) < 3){ // se a diferenca entre o x do p e do obstaculo e < 3
+            player->position.x-(envItems[i].rect.x+envItems[i].rect.width) < 1){ // se a diferenca entre o x do p e do obstaculo e < 3
             hitWall = -1; 
-            printf(" Tem uma parede na esquerda ");
+            //printf(" Tem uma parede na esquerda ");
         }
-        if (envItems[i].rect.y < player->position.y && 
-            player->position.x + 21 - envItems[i].rect.x > -2 &&
-            player->position.x < envItems[i].rect.x){
+        if (envItems[i].rect.y < player->position.y &&
+            (player->position.y-player->frame.height)<envItems[i].rect.y+envItems[i].rect.height &&
+            player->position.x < envItems[i].rect.x &&
+            envItems[i].rect.x-(player->position.x+player->frame.width) < 1){
             hitWall = 1; 
-            //printf("Tem uma parede na direita\n");
+                //printf("Tem uma parede na direita");
         }
     
     }
@@ -165,16 +165,16 @@ void drawPlayer(Player *player){
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
    
-    const int screenWidth = 800;
+    const int screenWidth = 760;
     const int screenHeight = 450;
 
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
 
     EnvItem envItems[] = {
-        {{ 150, 300, 200, 100}, 1, GREEN },
-        {{ 240, 250, 50, 50 }, 1, GREEN },
-        {{ 430, 250, 100, 10 }, 1, GREEN },
-        {{ 420, 150, 10, 50 }, 1, GREEN}
+        {{ 0, 256, 320, 300}, 1, GREEN },
+        //{{ 320, 256, 128, 32}, 1, BLACK },
+        {{ 448, 256, 320, 300}, 1, GREEN },
+        
     };
 
     int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
