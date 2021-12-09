@@ -3,11 +3,6 @@
 
 #define gravity 400
 
-/*
-    Tive um provblema pra colocar o sprite de caindo
-    A gt tenta resolver juntos dps :)
-*/
-
 typedef struct EnvItem {
     Rectangle rect;
     int blocking;
@@ -34,18 +29,56 @@ typedef struct {
     float vSpeed;
     char canJump;
     int playerState; // 0=idle 1=run 2 = runL
+    char facingDirection; //direita=1 esquerda=0
 } Player;
 
 //Funcao pra atualizar as variaveis do player
 void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envItemsLength){
 
+
+    int hitFloor = 0;
+    int hitWall = 0; // -1=esquerda e 1=direita
+    
+    //verifica as colisoes com cada obstaculo
+    for (int i = 0; i < envItemsLength; i++){
+        if (envItems[i].blocking && envItems[i].rect.x <= player->position.x + 15 &&
+            envItems[i].rect.x + envItems[i].rect.width >= player->position.x &&
+            envItems[i].rect.y >= player->position.y && 
+            envItems[i].rect.y < player->position.y + player->vSpeed*deltaTime){
+                hitFloor = 1;
+                player->vSpeed = 0.0f;
+                player->position.y = envItems[i].rect.y;
+            }
+
+        if(envItems[i].rect.width == 10){
+            printf("player: %f | obstaculo: %f | substracao: %f\n", player->position.x,  envItems[i].rect.x+envItems[i].rect.width, player->position.x+21-envItems[i].rect.x);
+        }
+        
+        if(envItems[i].blocking){
+            if (envItems[i].rect.y < player->position.y && 
+                player->position.x - 21 - envItems[i].rect.x + envItems[i].rect.width < 2 &&
+                player->position.x > envItems[i].rect.x){
+                hitWall = -1; 
+                //printf("Tem uma parede na esquerda\n");
+            }
+            if (envItems[i].rect.y < player->position.y && 
+                player->position.x + 21 - envItems[i].rect.x > -2 &&
+                player->position.x < envItems[i].rect.x){
+                hitWall = 1; 
+                //printf("Tem uma parede na esquerda\n");
+            }
+        }
+    }
+
     //atualiza o estado de animacao e o movimento horizonal
-    if(IsKeyDown(KEY_D)){
+    if(IsKeyDown(KEY_D) && hitWall != 1){
+        player->facingDirection = 1;
         player->position.x += player->hSpeed*deltaTime;
         player->playerState = 1;
         player->frame.width = (float)player->run.texture.width/player->run.maxFrames;
         player->frame.height = (float)player->run.texture.height;
-    }else if(IsKeyDown(KEY_A)){
+    }else if(IsKeyDown(KEY_A) && hitWall != -1){
+        player->facingDirection = 0;
         player->position.x -= player->hSpeed*deltaTime;
         player->playerState = 2;
         player->frame.width = (float)player->runLeft.texture.width/player->run.maxFrames;
@@ -62,34 +95,31 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
         player->canJump = false;
     }
 
-    int hitObstacle = 0;
-    
-    //verifica as colisoes com cada obstaculo
-    for (int i = 0; i < envItemsLength; i++){
-        EnvItem *ei = envItems + i;
-        Vector2 *p = &(player->position);
-        if (ei->blocking && ei->rect.x <= p->x + 15 &&
-            ei->rect.x + ei->rect.width >= p->x - 15 &&
-            ei->rect.y >= p->y && ei->rect.y < p->y + player->vSpeed*deltaTime){
-                hitObstacle = 1;
-                player->vSpeed = 0.0f;
-                p->y = ei->rect.y;
-        }
-    }
-
-    if (!hitObstacle){
+    if (!hitFloor){
         player->position.y += player->vSpeed*deltaTime;
         player->vSpeed += gravity*deltaTime;
 
         if(player->vSpeed < 0){ //player esta subindo
-            if(IsKeyDown(KEY_A))
-                player->playerState = 4;
-            else
-                player->playerState = 3;
 
+            if(IsKeyDown(KEY_A)){
+                player->playerState = 4;
+            }else{
+                player->playerState = 3;
+            }
             player->frame.width = (float)player->jumping.texture.width;
             player->frame.height = (float)player->jumping.texture.height;
-        } 
+
+        }else if(player->vSpeed > 10){
+
+            if(IsKeyDown(KEY_A)){
+                player->playerState = 6;
+            }else {
+                player->playerState = 5;
+            }
+            player->frame.width = (float)player->falling.texture.width;
+            player->frame.height = (float)player->falling.texture.height;
+            printf("estou caindoo\n");
+        }
 
         player->canJump = false;
     }else{
@@ -102,7 +132,7 @@ void drawPlayer(Player *player){
     Rectangle frame = player->frame;
     Vector2 position = {player->position.x, player->position.y - 35}; //desenha o player com correcao de altura
 
-    if(player->playerState == 4)
+    if(player->playerState == 4 || player->playerState == 6)
         frame.width = -player->frame.width;
 
     //anima de acordo com o estado
@@ -119,8 +149,14 @@ void drawPlayer(Player *player){
         case 3: //pulando p direita
             DrawTextureRec(player->jumping.texture, player->frame, position, WHITE);
             break;
-        case 4: //pulando p direita
+        case 4: //pulando p esquerda
             DrawTextureRec(player->jumping.texture, frame, position, WHITE);
+            break;
+        case 5: //caindo p direita
+            DrawTextureRec(player->falling.texture, player->frame, position, WHITE);
+            break;
+        case 6: //caindo p direita
+            DrawTextureRec(player->falling.texture, frame, position, WHITE);
             break;
     }
 }
@@ -135,10 +171,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     EnvItem envItems[] = {
         {{ 0, 0, 1000, 400 }, 0, BLUE },
-        {{ 251, 301, 100, 10 }, 0, DARKGRAY},
-        {{ 250, 300, 100, 10 }, 1, GREEN },
-        {{ 401, 301, 100, 10 }, 0, DARKGRAY},
-        {{ 400, 300, 100, 10 }, 1, GREEN }
+        {{ 250, 300, 100, 10}, 1, GREEN },
+        {{ 250, 250, 10, 50 }, 1, GREEN },
+        {{ 400, 300, 100, 10 }, 1, GREEN },
+        {{ 490, 250, 10, 50 }, 1, GREEN}
     };
 
     int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
@@ -200,7 +236,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         BeginDrawing();
             BeginMode2D(camera);
 
-                ClearBackground(BLUE);
+                ClearBackground(RAYWHITE);
 
                 for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //cria os obstaculos
 
