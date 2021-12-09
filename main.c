@@ -49,25 +49,26 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
                 player->vSpeed = 0.0f;
                 player->position.y = envItems[i].rect.y;
             }
-
-        if(envItems[i].rect.width == 10){
-            printf("player: %f | obstaculo: %f | substracao: %f\n", player->position.x,  envItems[i].rect.x+envItems[i].rect.width, player->position.x+21-envItems[i].rect.x);
-        }
         
-        if(envItems[i].blocking){
-            if (envItems[i].rect.y < player->position.y && 
-                player->position.x - 21 - envItems[i].rect.x + envItems[i].rect.width < 2 &&
-                player->position.x > envItems[i].rect.x){
-                hitWall = -1; 
-                //printf("Tem uma parede na esquerda\n");
-            }
-            if (envItems[i].rect.y < player->position.y && 
-                player->position.x + 21 - envItems[i].rect.x > -2 &&
-                player->position.x < envItems[i].rect.x){
-                hitWall = 1; 
-                //printf("Tem uma parede na esquerda\n");
-            }
+        if(envItems[i].rect.width == 50){
+            printf("Player: %f | plataforma: %f | subtracao: %f\n", player->position.x, envItems[i].rect.x, player->position.x-(envItems[i].rect.x+envItems[i].rect.width));
+        } 
+
+        //detecta colosioes laterais
+        if (envItems[i].rect.y < player->position.y && //se o topo do obstaculo esta acima do p
+            (player->position.y-player->frame.height)<envItems[i].rect.y+envItems[i].rect.height && //se o pe do obstaculo esta acima do p
+            player->position.x > envItems[i].rect.x && //se o ostaculo esta a esquerda do p
+            player->position.x-(envItems[i].rect.x+envItems[i].rect.width) < 3){ // se a diferenca entre o x do p e do obstaculo e < 3
+            hitWall = -1; 
+            printf(" Tem uma parede na esquerda ");
         }
+        if (envItems[i].rect.y < player->position.y && 
+            player->position.x + 21 - envItems[i].rect.x > -2 &&
+            player->position.x < envItems[i].rect.x){
+            hitWall = 1; 
+            //printf("Tem uma parede na direita\n");
+        }
+    
     }
 
     //atualiza o estado de animacao e o movimento horizonal
@@ -170,11 +171,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
 
     EnvItem envItems[] = {
-        {{ 0, 0, 1000, 400 }, 0, BLUE },
-        {{ 250, 300, 100, 10}, 1, GREEN },
-        {{ 250, 250, 10, 50 }, 1, GREEN },
-        {{ 400, 300, 100, 10 }, 1, GREEN },
-        {{ 490, 250, 10, 50 }, 1, GREEN}
+        {{ 150, 300, 200, 100}, 1, GREEN },
+        {{ 240, 250, 50, 50 }, 1, GREEN },
+        {{ 430, 250, 100, 10 }, 1, GREEN },
+        {{ 420, 150, 10, 50 }, 1, GREEN}
     };
 
     int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
@@ -236,7 +236,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         BeginDrawing();
             BeginMode2D(camera);
 
-                ClearBackground(RAYWHITE);
+                ClearBackground(BLUE);
 
                 for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //cria os obstaculos
 
