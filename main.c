@@ -34,7 +34,6 @@ typedef struct {
 //Funcao pra atualizar as variaveis do player
 void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envItemsLength){
 
-
     int hitFloor = 0;
     int hitWall = 0; // -1=esquerda e 1=direita
     
@@ -161,26 +160,36 @@ void drawPlayer(Player *player){
 //Funcao para mover a camera (y fixo e x de acordo com o player)
 void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenHeight){
 
-    camera->offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2};
-    camera->target = (Vector2){player->position.x, (float)(screenHeight/2-48)};
-
+    camera->offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2+6};
+    camera->target = (Vector2){player->position.x, 128};
+    //(float)(screenHeight/2-48)
 }
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
    
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenWidth = 1600;
+    const int screenHeight = 900;
 
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
 
-    EnvItem envItems[] = {
-        {{ 0, 256, 320, 300}, 1, GREEN },
-        //{{ 320, 256, 128, 32}, 1, BLACK },
-        {{ 448, 256, 320, 300}, 1, GREEN },
-        
-    };
+    char chao[] = {1,1,1,1,1,'\0'};
+    
+    EnvItem envItems[sizeof(chao)];
+    int posx = 0, posy = 320;
+    for(int i = 0; i<(int)sizeof(chao); i++){
+        if(chao[i]){
+            envItems[i].color = GREEN;
+            envItems[i].rect.width = 32;
+            envItems[i].rect.height = 32;
+            envItems[i].rect.x = posx;
+            envItems[i].rect.y = posy;
+        }
+        posx +=64;
+    } 
+ 
 
     int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
+
 
     //instancia o player com a animacao idle
     Player player = {0};
@@ -189,8 +198,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     player.jumpS = 250;
     player.idle.texture = LoadTexture("../resources/idle.png");
     player.idle.maxFrames = 12;
-    player.position.x = 128;
-    player.position.y = 256;
+    player.position.x = 0;
+    player.position.y = 128;
     player.frame.x = 0.0f;
     player.frame.y = 0.0f;
     player.frame.width = (float)player.idle.texture.width/player.idle.maxFrames;
@@ -221,7 +230,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     camera.rotation = 0.0f;
     camera.zoom = 2.0f;
 
-
     SetTargetFPS(60);
 
     // Main game loop
@@ -234,8 +242,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         updatePlayer(&player, deltaTime, envItems, envItemsLength);
 
         if(IsKeyPressed(KEY_R)){
-            player.position.y = 256;
-            player.position.x = 128;
+            player.position.y = 100;
+            player.position.x = 300;
             player.vSpeed = 0;
         }
       
@@ -244,6 +252,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                 ClearBackground(BLUE);
 
+                //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
                 for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
 
                 //conta os frames para animacao
