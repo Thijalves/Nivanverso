@@ -120,7 +120,9 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
 
 }
 
+//Funcao para desenhar o player
 void drawPlayer(Player *player){
+
     Rectangle invertedFrame = player->frame;
     Vector2 position = {player->position.x, player->position.y - 35}; //desenha o player com correcao de altura
 
@@ -156,10 +158,17 @@ void drawPlayer(Player *player){
     }
 }
 
+//Funcao para mover a camera (y fixo e x de acordo com o player)
+void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenHeight){
+
+    camera->offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2};
+    camera->target = (Vector2){player->position.x, (float)(screenHeight/2-48)};
+
+}
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
    
-    const int screenWidth = 760;
+    const int screenWidth = 800;
     const int screenHeight = 450;
 
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
@@ -180,8 +189,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     player.jumpS = 250;
     player.idle.texture = LoadTexture("../resources/idle.png");
     player.idle.maxFrames = 12;
-    player.position.x = screenWidth/2;
-    player.position.y = screenHeight/2;
+    player.position.x = 128;
+    player.position.y = 256;
     player.frame.x = 0.0f;
     player.frame.y = 0.0f;
     player.frame.width = (float)player.idle.texture.width/player.idle.maxFrames;
@@ -212,6 +221,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     camera.rotation = 0.0f;
     camera.zoom = 2.0f;
 
+
     SetTargetFPS(60);
 
     // Main game loop
@@ -219,12 +229,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
         float deltaTime = GetFrameTime();
 
+        updateCamera(&camera, &player, screenWidth, screenHeight);
 
         updatePlayer(&player, deltaTime, envItems, envItemsLength);
 
-
         if(IsKeyPressed(KEY_R)){
-            player.position.y = 0;
+            player.position.y = 256;
+            player.position.x = 128;
             player.vSpeed = 0;
         }
       
@@ -233,7 +244,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                 ClearBackground(BLUE);
 
-                for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //cria os obstaculos
+                for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
 
                 //conta os frames para animacao
                 timer += GetFrameTime();
@@ -244,9 +255,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 frame = frame % player.idle.maxFrames;
                 player.frame.x = (player.frame.width *frame);
 
-                drawPlayer(&player);
+                drawPlayer(&player); //desenha o player
 
-            EndMode2D();
+            EndMode2D();    
         EndDrawing();
 
     }
