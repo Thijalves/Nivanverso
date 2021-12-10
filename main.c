@@ -27,7 +27,7 @@ typedef struct {
     float hSpeed;
     float vSpeed;
     char canJump;
-    int playerState; // 0=idle 1=run 2 = runL
+    int playerState; // 0=idle 1=run 2 = jumping 3 = falling
     char facingDirection; //direita=1 esquerda=0
 } Player;
 
@@ -56,7 +56,7 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
         //detecta colosioes laterais
         if (envItems[i].rect.y < player->position.y && //se o topo do obstaculo esta acima do p
             (player->position.y-player->frame.height)<envItems[i].rect.y+envItems[i].rect.height && //se o pe do obstaculo esta acima do p
-            player->position.x > envItems[i].rect.x && //se o ostaculo esta a esquerda do p
+            player->position.x > envItems[i].rect.x && //se o obstaculo esta a esquerda do p
             player->position.x-(envItems[i].rect.x+envItems[i].rect.width) < 1){ // se a diferenca entre o x do p e do obstaculo e < 3
             hitWall = -1; 
             //printf(" Tem uma parede na esquerda ");
@@ -81,7 +81,7 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
     }else if(IsKeyDown(KEY_A) && hitWall != -1){
         player->facingDirection = 0;
         player->position.x -= player->hSpeed*deltaTime;
-        player->playerState = 2;
+        player->playerState = 1;
         player->frame.width = (float)player->runLeft.texture.width/player->run.maxFrames;
         player->frame.height = (float)player->runLeft.texture.height;
     }else{
@@ -102,24 +102,15 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
 
         if(player->vSpeed < 0){ //player esta subindo
 
-            if(IsKeyDown(KEY_A)){
-                player->playerState = 4;
-            }else{
-                player->playerState = 3;
-            }
+            player->playerState = 2;
             player->frame.width = (float)player->jumping.texture.width;
             player->frame.height = (float)player->jumping.texture.height;
 
         }else if(player->vSpeed > 10){
 
-            if(IsKeyDown(KEY_A)){
-                player->playerState = 6;
-            }else {
-                player->playerState = 5;
-            }
+            player->playerState = 3;
             player->frame.width = (float)player->falling.texture.width;
             player->frame.height = (float)player->falling.texture.height;
-            printf("estou caindoo\n");
         }
 
         player->canJump = false;
@@ -130,34 +121,37 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
 }
 
 void drawPlayer(Player *player){
-    Rectangle frame = player->frame;
+    Rectangle invertedFrame = player->frame;
     Vector2 position = {player->position.x, player->position.y - 35}; //desenha o player com correcao de altura
 
-    if(player->playerState == 4 || player->playerState == 6)
-        frame.width = -player->frame.width;
+    invertedFrame.width = -player->frame.width; //frame com comprimento invertido
 
     //anima de acordo com o estado
     switch(player->playerState){
         case 0: //boneco parado
-            DrawTextureRec(player->idle.texture, player->frame,  position, WHITE);
+            if(player->facingDirection)
+                DrawTextureRec(player->idle.texture, player->frame,  position, WHITE);
+            else
+                DrawTextureRec(player->idle.texture, invertedFrame,  position, WHITE);
+
             break;
         case 1: //andando p direita
-            DrawTextureRec(player->run.texture, player->frame, position, WHITE);
+            if(player->facingDirection)
+                DrawTextureRec(player->run.texture, player->frame, position, WHITE);
+            else
+                DrawTextureRec(player->run.texture, invertedFrame, position, WHITE);
             break;
-        case 2: //andando p esquerda
-            DrawTextureRec(player->runLeft.texture, player->frame, position, WHITE);
+        case 2: //pulando p direita
+            if(player->facingDirection)
+                DrawTextureRec(player->jumping.texture, player->frame, position, WHITE);
+            else
+                DrawTextureRec(player->jumping.texture, invertedFrame, position, WHITE);
             break;
-        case 3: //pulando p direita
-            DrawTextureRec(player->jumping.texture, player->frame, position, WHITE);
-            break;
-        case 4: //pulando p esquerda
-            DrawTextureRec(player->jumping.texture, frame, position, WHITE);
-            break;
-        case 5: //caindo p direita
-            DrawTextureRec(player->falling.texture, player->frame, position, WHITE);
-            break;
-        case 6: //caindo p direita
-            DrawTextureRec(player->falling.texture, frame, position, WHITE);
+        case 3: //caindo p direita
+            if(player->facingDirection)
+                DrawTextureRec(player->falling.texture, player->frame, position, WHITE);
+            else
+                DrawTextureRec(player->falling.texture, invertedFrame, position, WHITE);
             break;
     }
 }
@@ -227,6 +221,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
 
         updatePlayer(&player, deltaTime, envItems, envItemsLength);
+
 
         if(IsKeyPressed(KEY_R)){
             player.position.y = 0;
