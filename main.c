@@ -187,50 +187,97 @@ void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenH
 }
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
+
+    FILE *mapFile = fopen("../fase.txt","r");
+
+    if(mapFile == NULL)
+        printf("erro ao abrir arquivo\n");
    
     const int screenWidth = 900;
     const int screenHeight = 544;
 
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
 
-    char chao[] = {1,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,'\0'};
+    // char chao[] = {1,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,'\0'};
     //4 unidades eh o limite de pulo (pra quem joga bem)
 
-    EnvItem envItems[sizeof(chao)];
+    int mapWidth;
 
-    /* EnvItem envItems[] ={
-        {{ 0, 320, 32, 32 }, GREEN },
-        {{ 32, 320, 32, 32 }, GREEN },
-        {{ 64, 320, 32, 32 }, GREEN },
-        {{ 96, 320, 32, 32 }, GREEN },
-        {{ 128, 320, 32, 32 }, GREEN },
-        {{ 160, 320, 32, 32 }, GREEN },
-        {{ 192, 320, 32, 32 }, GREEN },
-        {{ 224, 320, 32, 32 }, GREEN },
-        {{ 256, 320, 32, 32 }, GREEN },
-        {{ 288, 320, 32, 32 }, GREEN },
-        {{ 320, 320, 32, 32 }, GREEN },
-        {{ 96, 288, 32, 32 }, GREEN },
-        {{ 128, 256, 32, 32 }, GREEN },
-        {{ 160, 224, 32, 32 }, GREEN },
-        {{ 192, 192, 32, 32 }, GREEN },
-        {{ 224, 160, 32, 32 }, GREEN },
-        {{ 256, 128, 32, 32 }, GREEN },
-        {{ 288, 96, 32, 32 }, GREEN },
-        {{ 320, 320, 32, 32 }, GREEN }
-    };  */
+    fseek(mapFile, -11, SEEK_END);
 
-    int posx = 0, posy = 320; 
-    for(int i = 0; i<(int)sizeof(chao); i++){
-        if(chao[i]){
+    fscanf(mapFile, "width: %d", &mapWidth);
+
+    printf("Largura do mapa: %d\n", mapWidth);
+
+
+    EnvItem envItems[1000];
+
+    fseek(mapFile, 0, SEEK_SET);
+
+    int posx = 0, posy = 0;
+    for(int i = 0; i < 1000; i++){
+        char block;
+
+        fscanf(mapFile, "%c", &block);
+        printf("%c", block);
+
+        if(block == '^' || block == 'x'){
             envItems[i].color = GREEN;
             envItems[i].rect.width = 32;
             envItems[i].rect.height = 32;
             envItems[i].rect.x = posx;
             envItems[i].rect.y = posy;
+        } else {
+            envItems[i].color = BLACK;
+            envItems[i].rect.width = 32;
+            envItems[i].rect.height = 32;
+            envItems[i].rect.x = posx;
+            envItems[i].rect.y = posy;
         }
-        posx +=32;
-    } 
+
+        posx += 32;
+
+        if(i % 99 == 0 && i != 0){
+            posy += 32;
+            posx = 0;
+        }
+    }
+
+    // EnvItem envItems[sizeof(chao)];
+
+    // EnvItem envItems[] ={
+    //     {{ 0, 320, 32, 32 }, GREEN },
+    //     {{ 32, 320, 32, 32 }, GREEN },
+    //     {{ 64, 320, 32, 32 }, GREEN },
+    //     {{ 96, 320, 32, 32 }, GREEN },
+    //     {{ 128, 320, 32, 32 }, GREEN },
+    //     {{ 160, 320, 32, 32 }, GREEN },
+    //     {{ 192, 320, 32, 32 }, GREEN },
+    //     {{ 224, 320, 32, 32 }, GREEN },
+    //     {{ 256, 320, 32, 32 }, GREEN },
+    //     {{ 288, 320, 32, 32 }, GREEN },
+    //     {{ 320, 320, 32, 32 }, GREEN },
+    //     {{ 96, 288, 32, 32 }, GREEN },
+    //     {{ 128, 256, 32, 32 }, GREEN },
+    //     {{ 160, 224, 32, 32 }, GREEN },
+    //     {{ 192, 192, 32, 32 }, GREEN },
+    //     {{ 224, 160, 32, 32 }, GREEN },
+    //     {{ 256, 128, 32, 32 }, GREEN },
+    //     {{ 288, 96, 32, 32 }, GREEN },
+    //     {{ 320, 320, 32, 32 }, GREEN }
+    // };
+
+    // int posx = 0, posy = 320; 
+    // for(int i = 0; i<(int)sizeof(chao); i++){
+    //     if(chao[i]){
+    //         envItems[i].color = GREEN;
+    //         envItems[i].rect.width = 32;
+    //         envItems[i].rect.height = 32;
+    //         envItems[i].rect.x = posx;
+    //         envItems[i].rect.y = posy;
+    //     }
+    //     posx += 32;
+    // }
 
     int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
 
@@ -271,7 +318,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     camera.target = player.position;
     camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f};
     camera.rotation = 0.0f;
-    camera.zoom = 2.0f;
+    camera.zoom = 0.5f;
 
     SetTargetFPS(60);
 
@@ -283,7 +330,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
         updatePlayer(&player, deltaTime, envItems, envItemsLength);
 
-        printf("%f\n", player.position.x);
+        // printf("%f\n", player.position.x);
 
         if(IsKeyPressed(KEY_R)){
             player.position.y = 320;
