@@ -4,7 +4,6 @@
 #define gravity 400
 typedef struct EnvItem {
     Rectangle rect;
-    int blocking;
     Color color;
 } EnvItem;
 
@@ -39,7 +38,7 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
     
     //verifica as colisoes com cada obstaculo
     for (int i = 0; i < envItemsLength; i++){
-        if (envItems[i].blocking && envItems[i].rect.x <= player->position.x + 15 &&
+        if (envItems[i].rect.x <= player->position.x + 15 &&
             envItems[i].rect.x + envItems[i].rect.width >= player->position.x &&
             envItems[i].rect.y >= player->position.y && 
             envItems[i].rect.y < player->position.y + player->vSpeed*deltaTime){
@@ -96,17 +95,21 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
     }
 
     if (!hitFloor){
-        player->position.y += player->vSpeed*deltaTime;
-        player->vSpeed += gravity*deltaTime;
+        //deixar a velocidade de queda maior que a de subida
+        if(player->vSpeed >=0){
+            player->position.y += player->vSpeed*deltaTime;
+            player->vSpeed += gravity*deltaTime;
+        }else{
+            player->position.y += player->vSpeed*deltaTime;
+            player->vSpeed += gravity*deltaTime*1.4;
+        }
+        
 
         if(player->vSpeed < 0){ //player esta subindo
-
             player->playerState = 2;
             player->frame.width = (float)player->jumping.texture.width;
             player->frame.height = (float)player->jumping.texture.height;
-
         }else if(player->vSpeed > 10){
-
             player->playerState = 3;
             player->frame.width = (float)player->falling.texture.width;
             player->frame.height = (float)player->falling.texture.height;
@@ -161,21 +164,63 @@ void drawPlayer(Player *player){
 void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenHeight){
 
     camera->offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2+6};
-    camera->target = (Vector2){player->position.x, 128};
+
+    float x, y;
+    
+    if(player->position.x <= 224){
+        x = 225;
+    }else if(player->position.x >= 3424){
+        x = 3425;
+    }else{
+        x = player->position.x;
+    }
+
+    if(player->position.y <= 194){
+        y = player->position.y+32;
+    }else{
+        y = (float)(screenHeight/2-48);
+    }
+
+    camera->target = (Vector2){x, y};
+    
     //(float)(screenHeight/2-48)
 }
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
    
-    const int screenWidth = 1600;
-    const int screenHeight = 900;
+    const int screenWidth = 900;
+    const int screenHeight = 544;
 
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
 
-    char chao[] = {1,1,1,1,1,'\0'};
-    
+    char chao[] = {1,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,'\0'};
+    //4 unidades eh o limite de pulo (pra quem joga bem)
+
     EnvItem envItems[sizeof(chao)];
-    int posx = 0, posy = 320;
+
+    /* EnvItem envItems[] ={
+        {{ 0, 320, 32, 32 }, GREEN },
+        {{ 32, 320, 32, 32 }, GREEN },
+        {{ 64, 320, 32, 32 }, GREEN },
+        {{ 96, 320, 32, 32 }, GREEN },
+        {{ 128, 320, 32, 32 }, GREEN },
+        {{ 160, 320, 32, 32 }, GREEN },
+        {{ 192, 320, 32, 32 }, GREEN },
+        {{ 224, 320, 32, 32 }, GREEN },
+        {{ 256, 320, 32, 32 }, GREEN },
+        {{ 288, 320, 32, 32 }, GREEN },
+        {{ 320, 320, 32, 32 }, GREEN },
+        {{ 96, 288, 32, 32 }, GREEN },
+        {{ 128, 256, 32, 32 }, GREEN },
+        {{ 160, 224, 32, 32 }, GREEN },
+        {{ 192, 192, 32, 32 }, GREEN },
+        {{ 224, 160, 32, 32 }, GREEN },
+        {{ 256, 128, 32, 32 }, GREEN },
+        {{ 288, 96, 32, 32 }, GREEN },
+        {{ 320, 320, 32, 32 }, GREEN }
+    };  */
+
+    int posx = 0, posy = 320; 
     for(int i = 0; i<(int)sizeof(chao); i++){
         if(chao[i]){
             envItems[i].color = GREEN;
@@ -184,12 +229,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             envItems[i].rect.x = posx;
             envItems[i].rect.y = posy;
         }
-        posx +=64;
+        posx +=32;
     } 
- 
 
     int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
-
 
     //instancia o player com a animacao idle
     Player player = {0};
@@ -199,7 +242,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     player.idle.texture = LoadTexture("../resources/idle.png");
     player.idle.maxFrames = 12;
     player.position.x = 0;
-    player.position.y = 128;
+    player.position.y = 320;
     player.frame.x = 0.0f;
     player.frame.y = 0.0f;
     player.frame.width = (float)player.idle.texture.width/player.idle.maxFrames;
@@ -226,7 +269,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     Camera2D camera = { 0 };
     camera.target = player.position;
-    camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
+    camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f};
     camera.rotation = 0.0f;
     camera.zoom = 2.0f;
 
@@ -234,16 +277,17 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     // Main game loop
     while (!WindowShouldClose())   {
-
         float deltaTime = GetFrameTime();
 
         updateCamera(&camera, &player, screenWidth, screenHeight);
 
         updatePlayer(&player, deltaTime, envItems, envItemsLength);
 
+        printf("%f\n", player.position.x);
+
         if(IsKeyPressed(KEY_R)){
-            player.position.y = 100;
-            player.position.x = 300;
+            player.position.y = 320;
+            player.position.x = 0;
             player.vSpeed = 0;
         }
       
