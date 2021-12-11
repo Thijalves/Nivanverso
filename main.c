@@ -1,7 +1,8 @@
 #include "raylib.h"
 #include <stdio.h>
 
-#define gravity 400
+#define gravity 350
+
 typedef struct EnvItem {
     Rectangle rect;
     Color color;
@@ -175,10 +176,10 @@ void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenH
         x = player->position.x;
     }
 
-    if(player->position.y <= 194){
-        y = player->position.y+32;
+    if(player->position.y <= 98){
+        y = player->position.y-32;
     }else{
-        y = (float)(screenHeight/2-48);
+        y = (float)(screenHeight/2- 96);
     }
 
     camera->target = (Vector2){x, y};
@@ -221,63 +222,39 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         fscanf(mapFile, "%c", &block);
         printf("%c", block);
 
-        if(block == '^' || block == 'x'){
-            envItems[i].color = GREEN;
-            envItems[i].rect.width = 32;
-            envItems[i].rect.height = 32;
-            envItems[i].rect.x = posx;
-            envItems[i].rect.y = posy;
-        } else {
-            envItems[i].color = BLACK;
-            envItems[i].rect.width = 32;
-            envItems[i].rect.height = 32;
-            envItems[i].rect.x = posx;
-            envItems[i].rect.y = posy;
+        switch(block){
+            case 'x':
+                envItems[i].color = BROWN;
+                envItems[i].rect.width = 32;
+                envItems[i].rect.height = 32;
+                envItems[i].rect.x = posx;
+                envItems[i].rect.y = posy;
+                break;
+            case '^':
+                envItems[i].color = GREEN;
+                envItems[i].rect.width = 32;
+                envItems[i].rect.height = 32;
+                envItems[i].rect.x = posx;
+                envItems[i].rect.y = posy;
+                break;
+            case '@':
+                envItems[i].color = RED;
+                envItems[i].rect.width = 32;
+                envItems[i].rect.height = 32;
+                envItems[i].rect.x = posx;
+                envItems[i].rect.y = posy;
+                break;
+            default:
+                break;
         }
 
-        posx += 32;
-
-        if(i % 99 == 0 && i != 0){
+        if(posx % 99*32 == 0 && posx != 0){
             posy += 32;
             posx = 0;
+        } else {
+            posx += 32;
         }
     }
-
-    // EnvItem envItems[sizeof(chao)];
-
-    // EnvItem envItems[] ={
-    //     {{ 0, 320, 32, 32 }, GREEN },
-    //     {{ 32, 320, 32, 32 }, GREEN },
-    //     {{ 64, 320, 32, 32 }, GREEN },
-    //     {{ 96, 320, 32, 32 }, GREEN },
-    //     {{ 128, 320, 32, 32 }, GREEN },
-    //     {{ 160, 320, 32, 32 }, GREEN },
-    //     {{ 192, 320, 32, 32 }, GREEN },
-    //     {{ 224, 320, 32, 32 }, GREEN },
-    //     {{ 256, 320, 32, 32 }, GREEN },
-    //     {{ 288, 320, 32, 32 }, GREEN },
-    //     {{ 320, 320, 32, 32 }, GREEN },
-    //     {{ 96, 288, 32, 32 }, GREEN },
-    //     {{ 128, 256, 32, 32 }, GREEN },
-    //     {{ 160, 224, 32, 32 }, GREEN },
-    //     {{ 192, 192, 32, 32 }, GREEN },
-    //     {{ 224, 160, 32, 32 }, GREEN },
-    //     {{ 256, 128, 32, 32 }, GREEN },
-    //     {{ 288, 96, 32, 32 }, GREEN },
-    //     {{ 320, 320, 32, 32 }, GREEN }
-    // };
-
-    // int posx = 0, posy = 320; 
-    // for(int i = 0; i<(int)sizeof(chao); i++){
-    //     if(chao[i]){
-    //         envItems[i].color = GREEN;
-    //         envItems[i].rect.width = 32;
-    //         envItems[i].rect.height = 32;
-    //         envItems[i].rect.x = posx;
-    //         envItems[i].rect.y = posy;
-    //     }
-    //     posx += 32;
-    // }
 
     int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
 
@@ -288,10 +265,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     player.jumpS = 250;
     player.idle.texture = LoadTexture("../resources/idle.png");
     player.idle.maxFrames = 12;
-    player.position.x = 0;
-    player.position.y = 320;
+    player.position.x = 10;
+    player.position.y = 256;
     player.frame.x = 0.0f;
     player.frame.y = 0.0f;
+    player.facingDirection = 1;
     player.frame.width = (float)player.idle.texture.width/player.idle.maxFrames;
     player.frame.height = (float)player.idle.texture.height;
 
@@ -318,7 +296,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     camera.target = player.position;
     camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f};
     camera.rotation = 0.0f;
-    camera.zoom = 0.5f;
+    camera.zoom = 2.0f;
 
     SetTargetFPS(60);
 
@@ -333,7 +311,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         // printf("%f\n", player.position.x);
 
         if(IsKeyPressed(KEY_R)){
-            player.position.y = 320;
+            player.position.y = 100;
             player.position.x = 0;
             player.vSpeed = 0;
         }
