@@ -1,12 +1,6 @@
 #include "raylib.h"
 #include <stdio.h>
-#include "structPlayer.h"
-#include "envItemsStruct.h"
-#include "updatePlayer.h"
-#include "drawPlayer.h"
-#include "updateCamera.h"
-#include "initiatePlayer.h"
-#include "initiateCamera.h"
+#include "player.h"
 
 typedef enum {
     MENU = 0,
@@ -15,15 +9,77 @@ typedef enum {
 } Selection;
 
 
+//Funcao para desenhar o player
+void drawPlayer(Player *player){
+
+    Rectangle invertedFrame = player->frame;
+    Vector2 position = {player->position.x, player->position.y - 35}; //desenha o player com correcao de altura
+
+    invertedFrame.width = -player->frame.width; //frame com comprimento invertido
+
+    //anima de acordo com o estado
+    switch(player->playerState){
+        case 0: //boneco parado
+            if(player->facingDirection)
+                DrawTextureRec(player->idle.texture, player->frame,  position, WHITE);
+            else
+                DrawTextureRec(player->idle.texture, invertedFrame,  position, WHITE);
+
+            break;
+        case 1: //andando p direita
+            if(player->facingDirection)
+                DrawTextureRec(player->run.texture, player->frame, position, WHITE);
+            else
+                DrawTextureRec(player->run.texture, invertedFrame, position, WHITE);
+            break;
+        case 2: //pulando p direita
+            if(player->facingDirection)
+                DrawTextureRec(player->jumping.texture, player->frame, position, WHITE);
+            else
+                DrawTextureRec(player->jumping.texture, invertedFrame, position, WHITE);
+            break;
+        case 3: //caindo p direita
+            if(player->facingDirection)
+                DrawTextureRec(player->falling.texture, player->frame, position, WHITE);
+            else
+                DrawTextureRec(player->falling.texture, invertedFrame, position, WHITE);
+            break;
+    }
+}
+
+//Funcao para mover a camera (y fixo e x de acordo com o player)
+void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenHeight){
+
+    camera->offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2+6};
+
+    float x, y;
+    
+    if(player->position.x <= 224){
+        x = 225;
+    }else if(player->position.x >= 3424){
+        x = 3425;
+    }else{
+        x = player->position.x;
+    }
+
+    if(player->position.y <= 98){
+        y = player->position.y-32;
+    }else{
+        y = (float)(screenHeight/2- 96);
+    }
+
+    camera->target = (Vector2){x, y};
+    //(float)(screenHeight/2-48)
+}
+
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
 
-    
     //variaveis do menu
     int framesCounter=0;
     Selection Option = MENU;
 
     //carerga os arquivos de mapa
-    FILE *mapFile = fopen("../fase.txt","r");
+    FILE *mapFile = fopen("../fase1.txt","r");
     if(mapFile == NULL)
         printf("erro ao abrir arquivo\n");
    
@@ -32,7 +88,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
 
-    // char chao[] = {1,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,'\0'};
     //4 unidades eh o limite de pulo (pra quem joga bem)
 
     int mapWidth;
@@ -57,7 +112,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     Texture2D grassWallRight = LoadTexture("../resources/tilemap/gramaD.png");
     Texture2D dirt = LoadTexture("../resources/tilemap/terra.png");
     Texture2D lava = LoadTexture("../resources/tilemap/lava.png");
-
 
     int posx = 0, posy = 0;
     for(int i = 0; i < 1000; i++){
@@ -134,9 +188,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 envItems[i].rect.y = posy;
                 envItems[i].hasTexture =1;
                 break;
-            default:
-                envItems[i].hasTexture = 0;
-                break;
+            
         }
 
         if(posx % 99*32 == 0 && posx != 0){
@@ -151,8 +203,35 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     //instancia o player com a animacao idle
     Player player = {0};
-    initiatePlayer(&player);
-    
+    player.hSpeed = 125;
+    player.vSpeed = 0;
+    player.jumpS = 250;
+    player.idle.texture = LoadTexture("../resources/idle.png");
+    player.idle.maxFrames = 12;
+    player.position.x = 10;
+    player.position.y = 256;
+    player.frame.x = 0.0f;
+    player.frame.y = 0.0f;
+    player.facingDirection = 1;
+    player.frame.width = (float)player.idle.texture.width/player.idle.maxFrames;
+    player.frame.height = (float)player.idle.texture.height;
+
+    //carrega a anumacao run
+    player.run.texture = LoadTexture("../resources/run.png");
+    player.run.maxFrames = 8;
+
+    //animacao de correr para a esquerda
+    player.runLeft.texture = LoadTexture("../resources/runLeft.png");
+    player.runLeft.maxFrames = 8;
+
+    //sprite pulando
+    player.jumping.texture = LoadTexture("../resources/jumping.png");
+    player.jumping.maxFrames = 1;
+
+    //sprite caindo
+    player.falling.texture = LoadTexture("../resources/falling.png");
+    player.falling.maxFrames = 1;
+
     //carrega a fonte
     Font font = LoadFontEx("../assets/font1.ttf", 50, 0, 0);
     SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
@@ -167,19 +246,26 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     char *text3; text3 = NULL;
     text3 = LoadFileText("../data/help.txt");
 
+    //carrega os blocos
+    Texture2D grama = LoadTexture("../resources/tilemap/grama.png");
+
     float timer = 0;
     int frame = 0;
 
     Camera2D camera = { 0 };
-    initiateCamera(&camera, player, screenWidth, screenHeight);
+    camera.target = player.position;
+    camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f};
+    camera.rotation = 0.0f;
+    camera.zoom = 2.0f;
 
     SetTargetFPS(60);
 
-    char fechar = 0;
+    int help = 0;
 
     //detecta o que foi pressionado
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    while (!WindowShouldClose() || help==1)    // Detect window close button or ESC key
     {
+        help = 0;
         switch(Option){
             case MENU:
                 if(IsKeyPressed(KEY_ENTER)){
@@ -213,13 +299,14 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                     ClearBackground(BLUE);
 
-                    //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
                     for (int i = 0; i < envItemsLength; i++){
                         if(envItems[i].hasTexture)
                             DrawTextureV(envItems[i].texture, (Vector2){envItems[i].rect.x,envItems[i].rect.y}, WHITE);
                         else
                             DrawRectangleRec(envItems[i].rect, envItems[i].color);
                     }
+                    //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
+
                     //conta os frames para animacao
                     timer += GetFrameTime();
                     if(timer >= 0.075)
@@ -236,7 +323,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     EndDrawing();
 
                 }
-
+                
                 UnloadTexture(grassSingle);
                 UnloadTexture(GrassIntenalEdgeL);
                 UnloadTexture(GrassIntenalEdgeD);
@@ -274,6 +361,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             EndDrawing();
                             if(IsKeyPressed(KEY_ESCAPE)){
                                 Option = MENU;
+                                help = 1;
                                 break;
                             }
                         }
@@ -292,7 +380,17 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         
         EndDrawing();
     }
-
+        
+        UnloadTexture(grassSingle);
+        UnloadTexture(GrassIntenalEdgeL);
+        UnloadTexture(GrassIntenalEdgeD);
+        UnloadTexture(grass);
+        UnloadTexture(grassEdgeLeft);
+        UnloadTexture(grassEdgeRight);
+        UnloadTexture(grassWallLeft);
+        UnloadTexture(grassWallRight);
+        UnloadTexture(lava);
+        UnloadTexture(GrassIntenalEdgeL);
         UnloadTexture(player.idle.texture);
         UnloadTexture(player.run.texture);
         UnloadTexture(player.runLeft.texture);
