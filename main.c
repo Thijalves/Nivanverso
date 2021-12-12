@@ -7,6 +7,7 @@
 #include "updateCamera.h"
 #include "initiatePlayer.h"
 #include "initiateCamera.h"
+#include "mapGenerator.h"
 
 typedef enum {
     MENU = 0,
@@ -22,6 +23,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     int framesCounter=0;
     Selection Option = MENU;
 
+    generateMap();
     //carerga os arquivos de mapa
     FILE *mapFile = fopen("./data/fase1.txt","r");
     if(mapFile == NULL)
