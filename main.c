@@ -44,7 +44,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     fseek(mapFile, 0, SEEK_SET);
 
-    Texture2D grassSingle = LoadTexture("./tilemap/milinho.png");
+    Texture2D sky = LoadTexture("./textures/ceu.png");
+    Texture2D grassSingle = LoadTexture("./tilemap/miolinho.png");
     Texture2D GrassIntenalEdgeL = LoadTexture("./textures/tilemap/subidaE.png");
     Texture2D GrassIntenalEdgeD = LoadTexture("./textures/tilemap/subidaD.png");
     Texture2D grass = LoadTexture("./textures/tilemap/grama.png");
@@ -212,6 +213,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                     ClearBackground(BLUE);
 
+                    DrawTextureV(sky, (Vector2){0,0}, WHITE);
+
                     //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
                     for (int i = 0; i < envItemsLength; i++){
                         if(envItems[i].hasTexture)
@@ -236,6 +239,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                 }
 
+                UnloadTexture(sky);
                 UnloadTexture(grassSingle);
                 UnloadTexture(GrassIntenalEdgeL);
                 UnloadTexture(GrassIntenalEdgeD);
@@ -293,6 +297,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         EndDrawing();
     }
 
+                UnloadTexture(sky);
                 UnloadTexture(grassSingle);
                 UnloadTexture(GrassIntenalEdgeL);
                 UnloadTexture(GrassIntenalEdgeD);
