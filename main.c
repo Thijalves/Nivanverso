@@ -17,16 +17,16 @@ typedef enum {
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
 
-    
+
     //variaveis do menu
     int framesCounter=0;
     Selection Option = MENU;
 
     //carerga os arquivos de mapa
-    FILE *mapFile = fopen("../fase.txt","r");
+    FILE *mapFile = fopen("./fase.txt","r");
     if(mapFile == NULL)
         printf("erro ao abrir arquivo\n");
-   
+
     const int screenWidth = 900;
     const int screenHeight = 544;
 
@@ -47,16 +47,16 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     fseek(mapFile, 0, SEEK_SET);
 
-    Texture2D grassSingle = LoadTexture("../resources/tilemap/milinho.png");
-    Texture2D GrassIntenalEdgeL = LoadTexture("../resources/tilemap/subidaE.png");
-    Texture2D GrassIntenalEdgeD = LoadTexture("../resources/tilemap/subidaD.png");
-    Texture2D grass = LoadTexture("../resources/tilemap/grama.png");
-    Texture2D grassEdgeLeft = LoadTexture("../resources/tilemap/curvaE.png");
-    Texture2D grassEdgeRight = LoadTexture("../resources/tilemap/curvaD.png");
-    Texture2D grassWallLeft = LoadTexture("../resources/tilemap/gramaE.png");
-    Texture2D grassWallRight = LoadTexture("../resources/tilemap/gramaD.png");
-    Texture2D dirt = LoadTexture("../resources/tilemap/terra.png");
-    Texture2D lava = LoadTexture("../resources/tilemap/lava.png");
+    Texture2D grassSingle = LoadTexture("./tilemap/milinho.png");
+    Texture2D GrassIntenalEdgeL = LoadTexture("./resources/tilemap/subidaE.png");
+    Texture2D GrassIntenalEdgeD = LoadTexture("./resources/tilemap/subidaD.png");
+    Texture2D grass = LoadTexture("./resources/tilemap/grama.png");
+    Texture2D grassEdgeLeft = LoadTexture("./resources/tilemap/curvaE.png");
+    Texture2D grassEdgeRight = LoadTexture("./resources/tilemap/curvaD.png");
+    Texture2D grassWallLeft = LoadTexture("./resources/tilemap/gramaE.png");
+    Texture2D grassWallRight = LoadTexture("./resources/tilemap/gramaD.png");
+    Texture2D dirt = LoadTexture("./resources/tilemap/terra.png");
+    Texture2D lava = LoadTexture("./resources/tilemap/lava.png");
 
 
     int posx = 0, posy = 0;
@@ -152,20 +152,18 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     //instancia o player com a animacao idle
     Player player = {0};
     initiatePlayer(&player);
-    
+
     //carrega a fonte
-    Font font = LoadFontEx("../assets/font1.ttf", 50, 0, 0);
+    Font font = LoadFontEx("./assets/font1.ttf", 50, 0, 0);
     SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
 
     //carrega o .txt
     char *text; text = NULL;
-    text = LoadFileText("../data/about.txt");
+    text = LoadFileText("./data/about.txt");
 
     char *text2; text2 = NULL;
-    text2 = LoadFileText("../data/credits.txt");
+    text2 = LoadFileText("./data/credits.txt");
 
-    char *text3; text3 = NULL;
-    text3 = LoadFileText("../data/help.txt");
 
     float timer = 0;
     int frame = 0;
@@ -175,11 +173,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     SetTargetFPS(60);
 
-    char fechar = 0;
-
+    int help = 0;
     //detecta o que foi pressionado
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    while (!WindowShouldClose() || help==1)    // Detect window close button or ESC key
     {
+        help = 0;
         switch(Option){
             case MENU:
                 if(IsKeyPressed(KEY_ENTER)){
@@ -187,6 +185,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 } else if(IsKeyPressed(KEY_C)){
                     Option = CREDITS;
                 }
+                break;
+            case PLAY:
+                break;
+            case CREDITS:
                 break;
         }
 
@@ -255,14 +257,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 UnloadFont(font);
                 UnloadFileText(text);
                 UnloadFileText(text2);
-                UnloadFileText(text3);
                 CloseWindow();
 
             } break;
 
             case CREDITS:
             {
-                if ("../data/credits.txt" != NULL)
+                if ("./data/credits.txt" != NULL)
                 {
                     if (text2)
                     {
@@ -274,35 +275,46 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             EndDrawing();
                             if(IsKeyPressed(KEY_ESCAPE)){
                                 Option = MENU;
+                                help = 1;
                                 break;
                             }
                         }
                     }
                 }
             } break;
-
+            case MENU:
+            break;
         }
 
         framesCounter+=3; //a cada frame, (x) letras sao printadas,  quanto maior, mais rapido
         BeginDrawing();
-        
+
         ClearBackground(SKYBLUE);
         DrawTextEx(font, "NIVAN no Nivanverso", (Vector2){175, 100}, 35, 8, YELLOW);
         DrawTextEx(font, TextSubtext("INICIAR - Enter\n CREDITOS - C", 0, framesCounter/5), (Vector2){260, 225}, 35, 8, BLACK);
-        
+
         EndDrawing();
     }
 
-        UnloadTexture(player.idle.texture);
-        UnloadTexture(player.run.texture);
-        UnloadTexture(player.runLeft.texture);
-        UnloadTexture(player.falling.texture);
-        UnloadTexture(player.jumping.texture);
-        UnloadFont(font);
-        UnloadFileText(text);
-        UnloadFileText(text2);
-        UnloadFileText(text3);
-        CloseWindow();
+                UnloadTexture(grassSingle);
+                UnloadTexture(GrassIntenalEdgeL);
+                UnloadTexture(GrassIntenalEdgeD);
+                UnloadTexture(grass);
+                UnloadTexture(grassEdgeLeft);
+                UnloadTexture(grassEdgeRight);
+                UnloadTexture(grassWallLeft);
+                UnloadTexture(grassWallRight);
+                UnloadTexture(lava);
+                UnloadTexture(GrassIntenalEdgeL);
+                UnloadTexture(player.idle.texture);
+                UnloadTexture(player.run.texture);
+                UnloadTexture(player.runLeft.texture);
+                UnloadTexture(player.falling.texture);
+                UnloadTexture(player.jumping.texture);
+                UnloadFont(font);
+                UnloadFileText(text);
+                UnloadFileText(text2);
+                CloseWindow();
 
     return 0;
 }
