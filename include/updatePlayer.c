@@ -17,10 +17,6 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
                 player->position.y = envItems[i].rect.y;
             }
         
-        /* if(envItems[i].rect.width == 50){
-            printf("Player: %f | plataforma: %f | subtracao: %f\n", player->position.x, envItems[i].rect.x, envItems[i].rect.x-(player->position.x+player->frame.width));
-        }  */
-
         //detecta colosioes laterais
         if (envItems[i].rect.y < player->position.y && //se o topo do obstaculo esta acima do p
             (player->position.y-player->frame.height)<envItems[i].rect.y+envItems[i].rect.height && //se o pe do obstaculo esta acima do p

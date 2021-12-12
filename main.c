@@ -23,7 +23,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     Selection Option = MENU;
 
     //carerga os arquivos de mapa
-    FILE *mapFile = fopen("./fase.txt","r");
+    FILE *mapFile = fopen("./data/fase1.txt","r");
     if(mapFile == NULL)
         printf("erro ao abrir arquivo\n");
 
@@ -31,9 +31,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     const int screenHeight = 544;
 
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
-
-    // char chao[] = {1,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,'\0'};
-    //4 unidades eh o limite de pulo (pra quem joga bem)
 
     int mapWidth;
 
@@ -48,15 +45,15 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     fseek(mapFile, 0, SEEK_SET);
 
     Texture2D grassSingle = LoadTexture("./tilemap/milinho.png");
-    Texture2D GrassIntenalEdgeL = LoadTexture("./resources/tilemap/subidaE.png");
-    Texture2D GrassIntenalEdgeD = LoadTexture("./resources/tilemap/subidaD.png");
-    Texture2D grass = LoadTexture("./resources/tilemap/grama.png");
-    Texture2D grassEdgeLeft = LoadTexture("./resources/tilemap/curvaE.png");
-    Texture2D grassEdgeRight = LoadTexture("./resources/tilemap/curvaD.png");
-    Texture2D grassWallLeft = LoadTexture("./resources/tilemap/gramaE.png");
-    Texture2D grassWallRight = LoadTexture("./resources/tilemap/gramaD.png");
-    Texture2D dirt = LoadTexture("./resources/tilemap/terra.png");
-    Texture2D lava = LoadTexture("./resources/tilemap/lava.png");
+    Texture2D GrassIntenalEdgeL = LoadTexture("./textures/tilemap/subidaE.png");
+    Texture2D GrassIntenalEdgeD = LoadTexture("./textures/tilemap/subidaD.png");
+    Texture2D grass = LoadTexture("./textures/tilemap/grama.png");
+    Texture2D grassEdgeLeft = LoadTexture("./textures/tilemap/curvaE.png");
+    Texture2D grassEdgeRight = LoadTexture("./textures/tilemap/curvaD.png");
+    Texture2D grassWallLeft = LoadTexture("./textures/tilemap/gramaE.png");
+    Texture2D grassWallRight = LoadTexture("./textures/tilemap/gramaD.png");
+    Texture2D dirt = LoadTexture("./textures/tilemap/terra.png");
+    Texture2D lava = LoadTexture("./textures/tilemap/lava.png");
 
 
     int posx = 0, posy = 0;
