@@ -27,12 +27,14 @@ typedef struct {
 
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
-    
+
     float peaoTimer = 0;
     float lavaTimer = 0;
     int lavaFrame = 0;
     int pause = 0;
-    
+    int c = 0;
+    int vida = 3;
+
     //variaveis do menu
     int framesCounter=0;
     Selection Option = MENU;
@@ -71,7 +73,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     Texture2D dirt = LoadTexture("./textures/tilemap/terra.png");
     Texture2D lava =  LoadTexture("./textures/tilemap/lava.png");
 
-    
+
     int posx = 0, posy = 0;
     for(int i = 0; i < 1000; i++){
         char block;
@@ -217,7 +219,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         switch(Option){
             case MENU:
                 if(IsKeyPressed(KEY_ENTER)){
-                    Option = PLAY;
+                    Option = PLAY; pause = 0;
                 } else if(IsKeyPressed(KEY_C)){
                     Option = CREDITS;
                 }
@@ -227,7 +229,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             case CREDITS:
                 break;
         }
-        
+
 
         switch(Option){
 
@@ -237,26 +239,18 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             case PLAY:
             {
                 while (!WindowShouldClose()){
-                    if(player.playerState == 4) pause = 1;
+                    if(player.playerState == 4) pause = 1, Option = MENU;
 
                     if(!pause){
                         float deltaTime = GetFrameTime();
-
                         updateCamera(&camera, &player, screenWidth, screenHeight);
-
                         updatePlayer(&player, deltaTime, envItems, envItemsLength);
-
-                        if(IsKeyPressed(KEY_R)){
-                            player.position.y = 100;
-                            player.position.x = 0;
-                            player.vSpeed = 0;
-                        }
 
                         BeginDrawing();
                         BeginMode2D(camera);
-
+                        DrawText("Vidas", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
                         ClearBackground(BLUE);
-                        
+
                         peaoTimer += GetFrameTime();
                         //Desenha o inimigo
                         if( peaoTimer >= 0.02){
@@ -270,10 +264,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         }
                         //detecta colisoes
                         //printf("%f %f\n", player.position.x+32, peao.rectangle.x);
-                        if( player.position.x + player.frame.width >= peao.rectangle.x && 
-                            player.position.x <= peao.rectangle.x + peao.rectangle.width && 
+                        if( player.position.x + player.frame.width >= peao.rectangle.x &&
+                            player.position.x <= peao.rectangle.x + peao.rectangle.width &&
                             player.position.y >= peao.rectangle.y){
-                            
+
                             if(player.position.y - peao.rectangle.y < 5){
                                 printf("matei o peao\n");
                                 player.vSpeed = -player.jumpS;
@@ -284,7 +278,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                                 player.playerState = 4;
                             }
 
-                        } 
+                        }
 
                         //conta os frames para animacao
                         playerTimer += GetFrameTime();
@@ -294,7 +288,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         }
                         playerFrame = playerFrame % player.idle.maxFrames;
                         player.frame.x = (player.frame.width*playerFrame);
-                        
+
                         DrawTextureV(sky, (Vector2){0,0}, WHITE);
 
                         //DrawRectangleRec(peao.rectangle, peao.color);
@@ -326,19 +320,39 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
 
-                        drawPlayer(&player); //desenha o player 
-
+                        drawPlayer(&player); //desenha o player
                         EndMode2D();
+                        DrawText(TextFormat("VIDAS: %d", vida), 760, 40, 20, RAYWHITE);
                         EndDrawing();
                     } else {
                         //jogo pausado
                         BeginDrawing();
-
-                            DrawText("MORREU FIOTE\nMENU - M", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+                        if(vida>0){
+                          DrawText("MORREU FIOTE\nMENU - M\nRestart - R", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+                        }else if(vida == 0){
+                            DrawText("MORREU FIOTE\nMENU - M\n", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+                        }
                         EndDrawing();
+                        if(IsKeyPressed(KEY_M)){
+                        Option = MENU;
+                        initiatePlayer(&player);
+                        player.playerState = 0;
+                        vida = 3;
+                        break;
+                    }else if(IsKeyPressed(KEY_R) && vida>0){
+                        player.position.y = 100;
+                        if(player.position.x>=160){player.position.x -= 96;}
+                        player.vSpeed = 0;
+                        player.playerState = 0;
+                        Option = PLAY;
+                        pause = 0;
+                        vida--;
+                        player.color = WHITE;
+                        c = 1;
                     }
+                  }
                 }
-
+                if(Option!=MENU && c==0 || IsKeyPressed(KEY_ESCAPE)==1){
                 UnloadTexture(sky);
                 UnloadTexture(grassSingle);
                 UnloadTexture(GrassIntenalEdgeL);
@@ -360,7 +374,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 UnloadFileText(text);
                 UnloadFileText(text2);
                 CloseWindow();
-
+                }c=0;
             } break;
 
             case CREDITS:
@@ -385,9 +399,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 }
             } break;
             case MENU:
+                {}
             break;
         }
-        
+
         framesCounter+=3; //a cada frame, (x) letras sao printadas,  quanto maior, mais rapido
         BeginDrawing();
 
@@ -395,9 +410,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         DrawTextEx(font, "NIVAN no Nivanverso", (Vector2){175, 100}, 35, 8, YELLOW);
         DrawTextEx(font, TextSubtext("INICIAR - Enter\n CREDITOS - C", 0, framesCounter/5), (Vector2){260, 225}, 35, 8, BLACK);
 
-        EndDrawing();    
+        EndDrawing();
     }
 
+                if(Option!=MENU && c==0){
                 UnloadTexture(sky);
                 UnloadTexture(grassSingle);
                 UnloadTexture(GrassIntenalEdgeL);
@@ -414,10 +430,12 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 UnloadTexture(player.runLeft.texture);
                 UnloadTexture(player.falling.texture);
                 UnloadTexture(player.jumping.texture);
+                UnloadTexture(peao.texture);
                 UnloadFont(font);
                 UnloadFileText(text);
                 UnloadFileText(text2);
                 CloseWindow();
+                }
 
     return 0;
 }
