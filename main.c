@@ -31,6 +31,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     float peaoTimer = 0;
     float lavaTimer = 0;
     int lavaFrame = 0;
+    int pause = 0;
     
     //variaveis do menu
     int framesCounter=0;
@@ -226,6 +227,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             case CREDITS:
                 break;
         }
+        
 
         switch(Option){
 
@@ -235,97 +237,106 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             case PLAY:
             {
                 while (!WindowShouldClose()){
+                    if(player.playerState == 4) pause = 1;
 
-                    float deltaTime = GetFrameTime();
+                    if(!pause){
+                        float deltaTime = GetFrameTime();
 
-                    updateCamera(&camera, &player, screenWidth, screenHeight);
+                        updateCamera(&camera, &player, screenWidth, screenHeight);
 
-                    updatePlayer(&player, deltaTime, envItems, envItemsLength);
+                        updatePlayer(&player, deltaTime, envItems, envItemsLength);
 
-                    if(IsKeyPressed(KEY_R)){
-                        player.position.y = 100;
-                        player.position.x = 0;
-                        player.vSpeed = 0;
-                    }
-
-                    BeginDrawing();
-                    BeginMode2D(camera);
-
-                    ClearBackground(BLUE);
-                    
-                    peaoTimer += GetFrameTime();
-                    //Desenha o inimigo
-                    if( peaoTimer >= 0.02){
-                        peaoTimer = 0;
-                        if(peao.rectangle.x >= peao.initialPosition.x + 96){
-                            peao.direction = -1;
-                        }else if(peao.rectangle.x <= peao.initialPosition.x - 96){
-                            peao.direction = 1;
+                        if(IsKeyPressed(KEY_R)){
+                            player.position.y = 100;
+                            player.position.x = 0;
+                            player.vSpeed = 0;
                         }
-                        peao.rectangle.x += peao.direction*peao.speed*deltaTime;
-                    }
-                    //detecta colisoes
-                    //printf("%f %f\n", player.position.x+32, peao.rectangle.x);
-                     if( player.position.x + player.frame.width >= peao.rectangle.x && 
-                        player.position.x <= peao.rectangle.x + peao.rectangle.width && 
-                        player.position.y >= peao.rectangle.y){
+
+                        BeginDrawing();
+                        BeginMode2D(camera);
+
+                        ClearBackground(BLUE);
                         
-                        if(player.position.y - peao.rectangle.y < 5){
-                            printf("matei o peao\n");
-                            player.vSpeed = -player.jumpS;
-                        }else{
-                            player.color = GRAY;
-                            player.vSpeed = -player.jumpS/2;
-                            printf("mori\n");
+                        peaoTimer += GetFrameTime();
+                        //Desenha o inimigo
+                        if( peaoTimer >= 0.02){
+                            peaoTimer = 0;
+                            if(peao.rectangle.x >= peao.initialPosition.x + 96){
+                                peao.direction = -1;
+                            }else if(peao.rectangle.x <= peao.initialPosition.x - 96){
+                                peao.direction = 1;
+                            }
+                            peao.rectangle.x += peao.direction*peao.speed*deltaTime;
                         }
-
-                    } 
-
-                    //conta os frames para animacao
-                    playerTimer += GetFrameTime();
-                    if(playerTimer >= 0.075f){
-                        playerTimer=0;
-                        playerFrame++;
-                    }
-                    playerFrame = playerFrame % player.idle.maxFrames;
-                    player.frame.x = (player.frame.width*playerFrame);
-                    
-                    DrawTextureV(sky, (Vector2){0,0}, WHITE);
-
-                    //DrawRectangleRec(peao.rectangle, peao.color);
-                    DrawTextureV(peao.texture, (Vector2) {peao.rectangle.x,peao.rectangle.y}, WHITE);
-
-                    //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
-                    for (int i = 0; i < envItemsLength; i++){
-                        if(envItems[i].hasTexture){
-                            if(envItems[i].isLava){
-                                DrawTextureRec(envItems[i].texture, envItems[i].frame, (Vector2){envItems[i].rect.x,envItems[i].rect.y}, WHITE);
+                        //detecta colisoes
+                        //printf("%f %f\n", player.position.x+32, peao.rectangle.x);
+                        if( player.position.x + player.frame.width >= peao.rectangle.x && 
+                            player.position.x <= peao.rectangle.x + peao.rectangle.width && 
+                            player.position.y >= peao.rectangle.y){
+                            
+                            if(player.position.y - peao.rectangle.y < 5){
+                                printf("matei o peao\n");
+                                player.vSpeed = -player.jumpS;
                             }else{
-                                DrawTextureV(envItems[i].texture, (Vector2){envItems[i].rect.x,envItems[i].rect.y}, WHITE);
+                                //player.color = GRAY;
+                                player.vSpeed = -player.jumpS/2;
+                                printf("mori\n");
+                                player.playerState = 4;
                             }
-                        }else
-                            DrawRectangleRec(envItems[i].rect, envItems[i].color);
-                    }
-                    //conta os frames para animacao da lava
-                    lavaTimer += GetFrameTime();
-                    if(lavaTimer >= 0.6f){
-                        lavaTimer=0;
-                        lavaFrame++;
-                    }
-                    lavaFrame = lavaFrame % 4;
-                    for (int i = 0; i < envItemsLength; i++){
-                        if(envItems[i].hasTexture){
-                            if(envItems[i].isLava){
-                                envItems[i].frame.x = 32*lavaFrame;
+
+                        } 
+
+                        //conta os frames para animacao
+                        playerTimer += GetFrameTime();
+                        if(playerTimer >= 0.075f){
+                            playerTimer=0;
+                            playerFrame++;
+                        }
+                        playerFrame = playerFrame % player.idle.maxFrames;
+                        player.frame.x = (player.frame.width*playerFrame);
+                        
+                        DrawTextureV(sky, (Vector2){0,0}, WHITE);
+
+                        //DrawRectangleRec(peao.rectangle, peao.color);
+                        DrawTextureV(peao.texture, (Vector2) {peao.rectangle.x,peao.rectangle.y}, WHITE);
+
+                        //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
+                        for (int i = 0; i < envItemsLength; i++){
+                            if(envItems[i].hasTexture){
+                                if(envItems[i].isLava){
+                                    DrawTextureRec(envItems[i].texture, envItems[i].frame, (Vector2){envItems[i].rect.x,envItems[i].rect.y}, WHITE);
+                                }else{
+                                    DrawTextureV(envItems[i].texture, (Vector2){envItems[i].rect.x,envItems[i].rect.y}, WHITE);
+                                }
+                            }else
+                                DrawRectangleRec(envItems[i].rect, envItems[i].color);
+                        }
+                        //conta os frames para animacao da lava
+                        lavaTimer += GetFrameTime();
+                        if(lavaTimer >= 0.6f){
+                            lavaTimer=0;
+                            lavaFrame++;
+                        }
+                        lavaFrame = lavaFrame % 4;
+                        for (int i = 0; i < envItemsLength; i++){
+                            if(envItems[i].hasTexture){
+                                if(envItems[i].isLava){
+                                    envItems[i].frame.x = 32*lavaFrame;
+                                }
                             }
                         }
+
+                        drawPlayer(&player); //desenha o player 
+
+                        EndMode2D();
+                        EndDrawing();
+                    } else {
+                        //jogo pausado
+                        BeginDrawing();
+
+                            DrawText("MORREU FIOTE\nMENU - M", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+                        EndDrawing();
                     }
-
-                    drawPlayer(&player); //desenha o player 
-
-                    EndMode2D();
-                    EndDrawing();
-
                 }
 
                 UnloadTexture(sky);
@@ -376,7 +387,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             case MENU:
             break;
         }
-
+        
         framesCounter+=3; //a cada frame, (x) letras sao printadas,  quanto maior, mais rapido
         BeginDrawing();
 
@@ -384,7 +395,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         DrawTextEx(font, "NIVAN no Nivanverso", (Vector2){175, 100}, 35, 8, YELLOW);
         DrawTextEx(font, TextSubtext("INICIAR - Enter\n CREDITOS - C", 0, framesCounter/5), (Vector2){260, 225}, 35, 8, BLACK);
 
-        EndDrawing();
+        EndDrawing();    
     }
 
                 UnloadTexture(sky);

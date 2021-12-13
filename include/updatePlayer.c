@@ -18,7 +18,7 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
                 if(envItems[i].isLava){
                     player->color = RED;
                     player->vSpeed = -player->jumpS/2;
-                    
+                    player->playerState = 4;
                 }
             }
         
