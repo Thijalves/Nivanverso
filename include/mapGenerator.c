@@ -43,7 +43,7 @@ void generateMap(){
     //utilização: ./main fase.bmp fase.txt
 
 
-    FILE *inputFile = fopen("./maps/fase.bmp", "r");
+    FILE *inputFile = fopen("./maps/fase1.bmp", "r");
 
     if(inputFile == NULL){
         printf("Erro ao abrir o arquivo\n");

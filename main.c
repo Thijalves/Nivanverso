@@ -15,10 +15,23 @@ typedef enum {
     CREDITS,
 } Selection;
 
+typedef struct {
+    Rectangle rectangle;
+    Texture2D texture;
+    int speed;
+    char type;
+    Vector2 initialPosition;
+    char direction; //-1 esquerda | 1 direita
+    Color color;
+} Enemy;
+
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
-
-
+    
+    float peaoTimer = 0;
+    float lavaTimer = 0;
+    int lavaFrame = 0;
+    
     //variaveis do menu
     int framesCounter=0;
     Selection Option = MENU;
@@ -28,7 +41,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     FILE *mapFile = fopen("./data/fase1.txt","r");
     if(mapFile == NULL)
         printf("erro ao abrir arquivo\n");
-
     const int screenWidth = 900;
     const int screenHeight = 544;
 
@@ -56,9 +68,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     Texture2D grassWallLeft = LoadTexture("./textures/tilemap/gramaE.png");
     Texture2D grassWallRight = LoadTexture("./textures/tilemap/gramaD.png");
     Texture2D dirt = LoadTexture("./textures/tilemap/terra.png");
-    Texture2D lava = LoadTexture("./textures/tilemap/lava.png");
+    Texture2D lava =  LoadTexture("./textures/tilemap/lava.png");
 
-
+    
     int posx = 0, posy = 0;
     for(int i = 0; i < 1000; i++){
         char block;
@@ -75,6 +87,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 envItems[i].rect.x = posx;
                 envItems[i].rect.y = posy;
                 envItems[i].hasTexture =1;
+                envItems[i].isLava = 0;
                 break;
             break;
             case 'd':
@@ -85,6 +98,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 envItems[i].rect.x = posx;
                 envItems[i].rect.y = posy;
                 envItems[i].hasTexture =1;
+                envItems[i].isLava = 0;
                 break;
             break;
             case 'l':
@@ -95,6 +109,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 envItems[i].rect.x = posx;
                 envItems[i].rect.y = posy;
                 envItems[i].hasTexture =1;
+                envItems[i].isLava = 0;
                 break;
             break;
             case 'r':
@@ -105,6 +120,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 envItems[i].rect.x = posx;
                 envItems[i].rect.y = posy;
                 envItems[i].hasTexture =1;
+                envItems[i].isLava = 0;
                 break;
             break;
             case 'x':
@@ -115,6 +131,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 envItems[i].rect.x = posx;
                 envItems[i].rect.y = posy;
                 envItems[i].hasTexture =1;
+                envItems[i].isLava = 0;
                 break;
             case '^':
                 envItems[i].texture = grass;
@@ -124,6 +141,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 envItems[i].rect.x = posx;
                 envItems[i].rect.y = posy;
                 envItems[i].hasTexture =1;
+                envItems[i].isLava = 0;
                 break;
             case '@':
                 envItems[i].texture = lava;
@@ -133,6 +151,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 envItems[i].rect.x = posx;
                 envItems[i].rect.y = posy;
                 envItems[i].hasTexture =1;
+                envItems[i].isLava = 1;
+                envItems[i].frame.x = 0.0f;
+                envItems[i].frame.y = 0.0f;
+                envItems[i].frame.width = 32;
+                envItems[i].frame.height = 32;
                 break;
             default:
                 envItems[i].hasTexture = 0;
@@ -153,6 +176,18 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     Player player = {0};
     initiatePlayer(&player);
 
+    Enemy peao = {0};
+    peao.texture = LoadTexture("./textures/inimigo/peao.png");
+    peao.rectangle.x = player.position.x + 64;
+    peao.initialPosition.x = player.position.x + 256;
+    peao.rectangle.y = player.position.y - 40;
+    peao.initialPosition.y = peao.rectangle.y;
+    peao.rectangle.width = 20;
+    peao.rectangle.height = 40;
+    peao.direction = 1;
+    peao.speed = 50;
+    peao.color = ORANGE;
+
     //carrega a fonte
     Font font = LoadFontEx("./assets/font1.ttf", 50, 0, 0);
     SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
@@ -165,8 +200,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     text2 = LoadFileText("./data/credits.txt");
 
 
-    float timer = 0;
-    int frame = 0;
+    float playerTimer = 0;
+    int playerFrame = 0;
 
     Camera2D camera = { 0 };
     initiateCamera(&camera, player, screenWidth, screenHeight);
@@ -194,6 +229,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
         switch(Option){
 
+            //pega a posicao inicial + um valor e - esse valor
+            //incrementar a pos x até a soma e subtarir x até a subtracao
+
             case PLAY:
             {
                 while (!WindowShouldClose()){
@@ -214,27 +252,76 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     BeginMode2D(camera);
 
                     ClearBackground(BLUE);
+                    
+                    peaoTimer += GetFrameTime();
+                    //Desenha o inimigo
+                    if( peaoTimer >= 0.02){
+                        peaoTimer = 0;
+                        if(peao.rectangle.x >= peao.initialPosition.x + 96){
+                            peao.direction = -1;
+                        }else if(peao.rectangle.x <= peao.initialPosition.x - 96){
+                            peao.direction = 1;
+                        }
+                        peao.rectangle.x += peao.direction*peao.speed*deltaTime;
+                    }
+                    //detecta colisoes
+                    //printf("%f %f\n", player.position.x+32, peao.rectangle.x);
+                     if( player.position.x + player.frame.width >= peao.rectangle.x && 
+                        player.position.x <= peao.rectangle.x + peao.rectangle.width && 
+                        player.position.y >= peao.rectangle.y){
+                        
+                        if(player.position.y - peao.rectangle.y < 5){
+                            printf("matei o peao\n");
+                            player.vSpeed = -player.jumpS;
+                        }else{
+                            player.color = GRAY;
+                            player.vSpeed = -player.jumpS/2;
+                            printf("mori\n");
+                        }
 
+                    } 
+
+                    //conta os frames para animacao
+                    playerTimer += GetFrameTime();
+                    if(playerTimer >= 0.075f){
+                        playerTimer=0;
+                        playerFrame++;
+                    }
+                    playerFrame = playerFrame % player.idle.maxFrames;
+                    player.frame.x = (player.frame.width*playerFrame);
+                    
                     DrawTextureV(sky, (Vector2){0,0}, WHITE);
+
+                    //DrawRectangleRec(peao.rectangle, peao.color);
+                    DrawTextureV(peao.texture, (Vector2) {peao.rectangle.x,peao.rectangle.y}, WHITE);
 
                     //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
                     for (int i = 0; i < envItemsLength; i++){
-                        if(envItems[i].hasTexture)
-                            DrawTextureV(envItems[i].texture, (Vector2){envItems[i].rect.x,envItems[i].rect.y}, WHITE);
-                        else
+                        if(envItems[i].hasTexture){
+                            if(envItems[i].isLava){
+                                DrawTextureRec(envItems[i].texture, envItems[i].frame, (Vector2){envItems[i].rect.x,envItems[i].rect.y}, WHITE);
+                            }else{
+                                DrawTextureV(envItems[i].texture, (Vector2){envItems[i].rect.x,envItems[i].rect.y}, WHITE);
+                            }
+                        }else
                             DrawRectangleRec(envItems[i].rect, envItems[i].color);
                     }
-                    //conta os frames para animacao
-                    timer += GetFrameTime();
-                    if(timer >= 0.075)
-                    {
-                        timer=0;
-                        frame++;
+                    //conta os frames para animacao da lava
+                    lavaTimer += GetFrameTime();
+                    if(lavaTimer >= 0.6f){
+                        lavaTimer=0;
+                        lavaFrame++;
                     }
-                    frame = frame % player.idle.maxFrames;
-                    player.frame.x = (player.frame.width *frame);
+                    lavaFrame = lavaFrame % 4;
+                    for (int i = 0; i < envItemsLength; i++){
+                        if(envItems[i].hasTexture){
+                            if(envItems[i].isLava){
+                                envItems[i].frame.x = 32*lavaFrame;
+                            }
+                        }
+                    }
 
-                    drawPlayer(&player); //desenha o player
+                    drawPlayer(&player); //desenha o player 
 
                     EndMode2D();
                     EndDrawing();
@@ -257,6 +344,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 UnloadTexture(player.runLeft.texture);
                 UnloadTexture(player.falling.texture);
                 UnloadTexture(player.jumping.texture);
+                UnloadTexture(peao.texture);
                 UnloadFont(font);
                 UnloadFileText(text);
                 UnloadFileText(text2);

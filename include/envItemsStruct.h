@@ -4,9 +4,11 @@
 #include "raylib.h"
 typedef struct EnvItem {
     Rectangle rect;
+    Rectangle frame;
     Color color;
     Texture2D texture;
     char hasTexture;
+    char isLava;
 } EnvItem;
 
 

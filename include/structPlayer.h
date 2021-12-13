@@ -18,6 +18,7 @@ typedef struct {
     Sprite runLeft;
     Sprite jumping;
     Sprite falling;
+    Color color;
     float jumpS;
     float hSpeed;
     float vSpeed;

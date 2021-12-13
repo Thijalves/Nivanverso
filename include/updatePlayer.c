@@ -15,6 +15,11 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
                 hitFloor = 1;
                 player->vSpeed = 0.0f;
                 player->position.y = envItems[i].rect.y;
+                if(envItems[i].isLava){
+                    player->color = RED;
+                    player->vSpeed = -player->jumpS/2;
+                    
+                }
             }
         
         //detecta colosioes laterais
