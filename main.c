@@ -8,6 +8,8 @@
 #include "initiatePlayer.h"
 #include "initiateCamera.h"
 #include "mapGenerator.h"
+#include "loadAllHandlerCarlos.h"
+#include "UnloadAllCarlos.h"
 
 typedef enum {
     MENU = 0,
@@ -28,6 +30,8 @@ typedef struct {
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
 
+    FILE *mapFile = NULL;
+    char *text, *text2; text = NULL, text2 = NULL;
     float peaoTimer = 0;
     float lavaTimer = 0;
     int lavaFrame = 0;
@@ -40,10 +44,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     Selection Option = MENU;
 
     generateMap();
-    //carerga os arquivos de mapa
-    FILE *mapFile = fopen("./data/fase1.txt","r");
-    if(mapFile == NULL)
-        printf("erro ao abrir arquivo\n");
+
     const int screenWidth = 900;
     const int screenHeight = 544;
 
@@ -61,18 +62,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     fseek(mapFile, 0, SEEK_SET);
 
-    Texture2D sky = LoadTexture("./textures/ceu.png");
-    Texture2D grassSingle = LoadTexture("./tilemap/miolinho.png");
-    Texture2D GrassIntenalEdgeL = LoadTexture("./textures/tilemap/subidaE.png");
-    Texture2D GrassIntenalEdgeD = LoadTexture("./textures/tilemap/subidaD.png");
-    Texture2D grass = LoadTexture("./textures/tilemap/grama.png");
-    Texture2D grassEdgeLeft = LoadTexture("./textures/tilemap/curvaE.png");
-    Texture2D grassEdgeRight = LoadTexture("./textures/tilemap/curvaD.png");
-    Texture2D grassWallLeft = LoadTexture("./textures/tilemap/gramaE.png");
-    Texture2D grassWallRight = LoadTexture("./textures/tilemap/gramaD.png");
-    Texture2D dirt = LoadTexture("./textures/tilemap/terra.png");
-    Texture2D lava =  LoadTexture("./textures/tilemap/lava.png");
 
+    Font font;
+    SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
+
+    Texture2D grassSingle, GrassIntenalEdgeL, lava, dirt, grassWallRight, grassWallLeft, grassEdgeRight, grassEdgeLeft, grass, GrassIntenalEdgeD, sky, peaoH;
+    loadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD
+    ,&font, &text, &text2, &sky, &peaoH);
 
     int posx = 0, posy = 0;
     for(int i = 0; i < 1000; i++){
@@ -178,9 +174,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     //instancia o player com a animacao idle
     Player player = {0};
     initiatePlayer(&player);
-
     Enemy peao = {0};
-    peao.texture = LoadTexture("./textures/inimigo/peao.png");
+    peao.texture = peaoH;
     peao.rectangle.x = player.position.x + 64;
     peao.initialPosition.x = player.position.x + 256;
     peao.rectangle.y = player.position.y - 40;
@@ -191,16 +186,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     peao.speed = 50;
     peao.color = ORANGE;
 
-    //carrega a fonte
-    Font font = LoadFontEx("./assets/font1.ttf", 50, 0, 0);
-    SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
-
-    //carrega o .txt
-    char *text; text = NULL;
-    text = LoadFileText("./data/about.txt");
-
-    char *text2; text2 = NULL;
-    text2 = LoadFileText("./data/credits.txt");
 
 
     float playerTimer = 0;
@@ -352,27 +337,16 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     }
                   }
                 }
-                if(Option!=MENU && c==0 || IsKeyPressed(KEY_ESCAPE)==1){
-                UnloadTexture(sky);
-                UnloadTexture(grassSingle);
-                UnloadTexture(GrassIntenalEdgeL);
-                UnloadTexture(GrassIntenalEdgeD);
-                UnloadTexture(grass);
-                UnloadTexture(grassEdgeLeft);
-                UnloadTexture(grassEdgeRight);
-                UnloadTexture(grassWallLeft);
-                UnloadTexture(grassWallRight);
-                UnloadTexture(lava);
-                UnloadTexture(GrassIntenalEdgeL);
+                if((Option!=MENU && c==0) || IsKeyPressed(KEY_ESCAPE)==1){
+                UnloadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD
+                ,&font, &text, &text2, &sky);
                 UnloadTexture(player.idle.texture);
                 UnloadTexture(player.run.texture);
                 UnloadTexture(player.runLeft.texture);
                 UnloadTexture(player.falling.texture);
                 UnloadTexture(player.jumping.texture);
                 UnloadTexture(peao.texture);
-                UnloadFont(font);
-                UnloadFileText(text);
-                UnloadFileText(text2);
+
                 CloseWindow();
                 }c=0;
             } break;
@@ -414,26 +388,16 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     }
 
                 if(Option!=MENU && c==0){
-                UnloadTexture(sky);
-                UnloadTexture(grassSingle);
-                UnloadTexture(GrassIntenalEdgeL);
-                UnloadTexture(GrassIntenalEdgeD);
-                UnloadTexture(grass);
-                UnloadTexture(grassEdgeLeft);
-                UnloadTexture(grassEdgeRight);
-                UnloadTexture(grassWallLeft);
-                UnloadTexture(grassWallRight);
-                UnloadTexture(lava);
-                UnloadTexture(GrassIntenalEdgeL);
+
+                UnloadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD
+                ,&font, &text, &text2, &sky);
+
                 UnloadTexture(player.idle.texture);
                 UnloadTexture(player.run.texture);
                 UnloadTexture(player.runLeft.texture);
                 UnloadTexture(player.falling.texture);
                 UnloadTexture(player.jumping.texture);
                 UnloadTexture(peao.texture);
-                UnloadFont(font);
-                UnloadFileText(text);
-                UnloadFileText(text2);
                 CloseWindow();
                 }
 
