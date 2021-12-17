@@ -25,6 +25,7 @@ typedef struct {
     char canJump;
     int playerState; // 0=idle 1=run 2 = jumping 3 = falling
     char facingDirection; //direita=1 esquerda=0
+    int vida;
 } Player;
 
 #endif 
