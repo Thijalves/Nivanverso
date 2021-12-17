@@ -2,7 +2,7 @@
 
 void initiatePlayer(Player *player){
     player->color = WHITE;
-    player->hSpeed = 125;
+    player->hSpeed = 125; //era 125
     player->vSpeed = 0;
     player->jumpS = 250;
     player->idle.texture = LoadTexture("./textures/idle.png");
@@ -14,6 +14,7 @@ void initiatePlayer(Player *player){
     player->facingDirection = 1;
     player->frame.width = (float)player->idle.texture.width/player->idle.maxFrames;
     player->frame.height = (float)player->idle.texture.height;
+    player->vida = 3;
     
     //carrega a anumacao run
     player->run.texture = LoadTexture("./textures/run.png");

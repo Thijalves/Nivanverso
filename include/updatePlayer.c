@@ -16,6 +16,8 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
                 player->vSpeed = 0.0f;
                 player->position.y = envItems[i].rect.y;
                 if(envItems[i].isLava){
+                    //mata o player
+                    player->vida--;
                     player->color = RED;
                     player->vSpeed = -player->jumpS/2;
                     player->playerState = 4;
@@ -41,26 +43,26 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
     }
 
     //atualiza o estado de animacao e o movimento horizonal
-    if(IsKeyDown(KEY_D) && hitWall != 1){
+    if(IsKeyDown(KEY_D) && hitWall != 1 && player->playerState != 4){
         player->facingDirection = 1;
         player->position.x += player->hSpeed*deltaTime;
         player->playerState = 1;
         player->frame.width = (float)player->run.texture.width/player->run.maxFrames;
         player->frame.height = (float)player->run.texture.height;
-    }else if(IsKeyDown(KEY_A) && hitWall != -1){
+    }else if(IsKeyDown(KEY_A) && hitWall != -1 && player->playerState != 4){
         player->facingDirection = 0;
         player->position.x -= player->hSpeed*deltaTime;
         player->playerState = 1;
         player->frame.width = (float)player->runLeft.texture.width/player->run.maxFrames;
         player->frame.height = (float)player->runLeft.texture.height;
-    }else{
+    }else if(player->playerState != 4){
         player->playerState = 0;
         player->frame.width = (float)player->idle.texture.width/player->idle.maxFrames;
         player->frame.height = (float)player->idle.texture.height;
     }
 
     //detecta pulo
-    if (IsKeyDown(KEY_SPACE) && player->canJump){
+    if (IsKeyDown(KEY_SPACE) && player->canJump && player->playerState != 4){
         player->vSpeed = -player->jumpS;
         player->canJump = false;
     }
