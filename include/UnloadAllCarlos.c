@@ -19,5 +19,4 @@ void UnloadAll(FILE **file, Texture2D *grassSingle, Texture2D *GrassIntenalEdgeL
                 UnloadFont(*font);
                 UnloadFileText(*text);
                 UnloadFileText(*text2);
-                CloseWindow();
 }
