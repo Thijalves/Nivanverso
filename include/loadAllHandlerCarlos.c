@@ -5,7 +5,7 @@
 void loadAll(FILE **file, Texture2D *grassSingle, Texture2D *GrassIntenalEdgeL, Texture2D *lava, Texture2D *dirt, Texture2D *grassWallRight
              ,Texture2D *grassWallLeft, Texture2D *grassEdgeRight, Texture2D *grassEdgeLeft, Texture2D *grass, Texture2D *GrassIntenalEdgeD, Font *font, char **text, char **text2, Texture2D *sky
              ,Texture2D *peao){
-    FILE *mapFile = fopen("C:/Users/Clebson/Documents/NIVAN-LOAD-UNLOAD/data/fase1.txt","r");
+    FILE *mapFile = fopen("./data/fase1.txt","r");
     if(mapFile == NULL)
     printf("erro ao abrir arquivo\n");
     else{
