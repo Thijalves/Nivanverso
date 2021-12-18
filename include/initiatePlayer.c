@@ -2,7 +2,7 @@
 
 void initiatePlayer(Player *player){
     player->color = WHITE;
-    player->hSpeed = 125; //era 125
+    player->hSpeed = 500; //era 125
     player->vSpeed = 0;
     player->jumpS = 250;
     player->idle.texture = LoadTexture("./textures/idle.png");

@@ -11,22 +11,13 @@
 #include "loadAllHandlerCarlos.h"
 #include "UnloadAllCarlos.h"
 #include "pawn.h"
+#include "audio.h"
 
 typedef enum {
     MENU = 0,
     PLAY,
     CREDITS,
 } Selection;
-
-/*typedef struct {
-    Rectangle rectangle;
-    Texture2D texture;
-    int speed;
-    char type;
-    Vector2 initialPosition;
-    char direction; //-1 esquerda | 1 direita
-    Color color;
-} Enemy;*/
 
 int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame e a textura
 
@@ -57,7 +48,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     printf("Largura do mapa: %d\n", mapWidth);
 
-    EnvItem envItems[2000];
+    EnvItem envItems[3000];
 
     fseek(mapFile, 0, SEEK_SET);
 
@@ -66,11 +57,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
 
     Texture2D grassSingle, GrassIntenalEdgeL, lava, dirt, grassWallRight, grassWallLeft, grassEdgeRight, grassEdgeLeft, grass, GrassIntenalEdgeD, sky;
-    loadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD, 
+    loadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD,
     &font, &text, &text2, &sky);
 
     int posx = 0, posy = 0;
-    for(int i = 0; i < 2000; i++){
+    for(int i = 0; i < 3000; i++){
         char block;
 
         fscanf(mapFile, "%c", &block);
@@ -160,7 +151,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 break;
         }
 
-        if(posx % 199*32 == 0 && posx != 0){
+        if(posx % 299*32 == 0 && posx != 0){
             posy += 32;
             posx = 0;
         } else {
@@ -175,13 +166,19 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     initiatePlayer(&player);
 
     //Iniciar o peao
-    Enemy pawn = {0};
-    initiatePawn(&pawn, &player);
+    //Enemy pawn = {0};
+    //initiatePawn(&pawn, (Vector2){256, 216});
 
+    Vector2 positions[] = {{256, 216}, {2200,120}};
+    int pawnsLength = sizeof(positions)/sizeof(positions[0]);
+    Enemy pawns[2];
+    for(int i = 0; i < pawnsLength; i++){
+        initiatePawn(&pawns[i], positions[i]);
+    }
     //Iniciar audio
-    //Audio audio;
-    //InitAudioDevice();
-    //
+    Audio audio;
+    InitAudioDevice();
+    //audio.select = LoadSound("audio/selection.mp3");
 
     float playerTimer = 0;
     int playerFrame = 0;
@@ -220,27 +217,34 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     if(!pause){
                         float deltaTime = GetFrameTime();
                         updateCamera(&camera, &player, screenWidth, screenHeight);
-                        updatePlayer(&player, deltaTime, envItems, envItemsLength);
+                        updatePlayer(&player, deltaTime, envItems, envItemsLength, &audio);
 
                         BeginDrawing();
                         BeginMode2D(camera);
                         DrawText("Vidas", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
-                        ClearBackground(BLUE);
+                        ClearBackground((Color){ 58, 111, 247, 255 });
+                        //DarkBlue{ 0, 82, 172, 255 } Blue{{ 0, 121, 241, 255 }}
 
                         pawnTimer += GetFrameTime();
 
                         //Desenha o inimigo
-                        if(pawnTimer >= 0.02){  
-                            pawnTimer = 0; 
-                            if(pawn.rectangle.x >= pawn.initialPosition.x + 96){
-                                pawn.direction = -1;
-                            }else if(pawn.rectangle.x <= pawn.initialPosition.x - 96){
-                                pawn.direction = 1;
+                        if(pawnTimer >= 0.02){
+                            for(int i = 0; i < pawnsLength; i++){
+                                pawnTimer = 0;
+                                if(pawns[i].rectangle.x >= pawns[i].initialPosition.x + 54){
+                                    pawns[i].direction = -1;
+                                }else if(pawns[i].rectangle.x <= pawns[i].initialPosition.x - 54){
+                                    pawns[i].direction = 1;
+                                }
+                                pawns[i].rectangle.x += pawns[i].direction*pawns[i].speed*deltaTime;
                             }
-                            pawn.rectangle.x += pawn.direction*pawn.speed*deltaTime;
                         }
 
-                        hitPawn(&pawn, &player);
+                        for(int i = 0; i < pawnsLength; i++){
+                            if(pawns[i].isAlive){
+                                hitPawn(&pawns[i], &player, &audio);
+                            }
+                        }
 
                         //conta os frames para animacao
                         playerTimer += GetFrameTime();
@@ -253,9 +257,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                         DrawTextureV(sky, (Vector2){0,0}, WHITE);
 
-                        DrawTextureV(pawn.texture, (Vector2) {pawn.rectangle.x,pawn.rectangle.y}, WHITE);
 
-                        //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenhna os obstaculos
+                        // DrawTextureV(pawn.texture, (Vector2) {pawn.rectangle.x,pawn.rectangle.y}, WHITE);
+
+                        //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenha os obstaculos
                         for (int i = 0; i < envItemsLength; i++){
                             if(envItems[i].hasTexture){
                                 if(envItems[i].isLava){
@@ -281,7 +286,14 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
 
+
                         drawPlayer(&player); //desenha o player
+                        for(int i = 0; i < pawnsLength; i++){
+                            if(pawns[i].isAlive){
+                                DrawTextureV(pawns[i].texture, (Vector2) {pawns[i].rectangle.x,pawns[i].rectangle.y}, WHITE);
+                            }
+                        }
+
                         EndMode2D();
                         DrawText(TextFormat("VIDAS: %d", player.vida), 760, 40, 20, RAYWHITE);
                         EndDrawing();
@@ -289,7 +301,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         //jogo pausado
                         BeginDrawing();
                         if(player.vida == 0){
-                            DrawText("MORREU FIOTE\nMENU - M\n", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+                            ClearBackground(SKYBLUE);
+                            DrawTextEx(font, "GAME OVER\nMENU - M", (Vector2){175, 100}, 35, 8, RED);
                             if(IsKeyPressed(KEY_M)){
                                 Option = MENU;
                                 initiatePlayer(&player);
@@ -318,7 +331,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(player.runLeft.texture);
                     UnloadTexture(player.falling.texture);
                     UnloadTexture(player.jumping.texture);
-                    UnloadTexture(pawn.texture);
+                    for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
+                    UnloadSound(audio.jump);
+                    CloseAudioDevice();
                     CloseWindow();
                 }c=0;
             } break;
@@ -326,7 +341,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             case CREDITS:
             {
                 if ("./data/credits.txt" != NULL){
-                    
+
                     if (text2){
                         while(!WindowShouldClose()){
                             if(IsKeyPressed(KEY_ESCAPE)){
@@ -368,7 +383,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(player.runLeft.texture);
                     UnloadTexture(player.falling.texture);
                     UnloadTexture(player.jumping.texture);
-                    UnloadTexture(pawn.texture);
+                    for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
+                    /*UnloadSound(audio.jump);
+                    CloseAudioDevice();
+                    */
                     CloseWindow();
                 }
 

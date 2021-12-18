@@ -1,10 +1,13 @@
 #include "updatePlayer.h"
+#include "audio.h"
 
 //Funcao pra atualizar as variaveis do player
-void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envItemsLength){
+void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envItemsLength, Audio *audio){
 
     int hitFloor = 0;
     int hitWall = 0; // -1=esquerda e 1=direita
+
+    //audio->jump = LoadSound("audio/jump.mp3");
     
     //verifica as colisoes com cada obstaculo
     for (int i = 0; i < envItemsLength; i++){
@@ -65,6 +68,7 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
     if (IsKeyDown(KEY_SPACE) && player->canJump && player->playerState != 4){
         player->vSpeed = -player->jumpS;
         player->canJump = false;
+        PlaySound(audio->jump);
     }
 
     if (!hitFloor){
