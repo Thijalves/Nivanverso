@@ -13,6 +13,7 @@
 #include "pawn.h"
 #include "audio.h"
 #include "platformStruct.h"
+#include "floatingPlatform.h"
 
 typedef enum {
     MENU = 0,
@@ -165,33 +166,30 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     //instancia o player com a animacao idle
     Player player = {0};
     initiatePlayer(&player);
-
-    //Iniciar o peao
-    //Enemy pawn = {0};
-    //initiatePawn(&pawn, (Vector2){256, 216});
-
-    //inicializa a plataforma flutuante
-    Platform plataforma = {0};
-    plataforma.texture = LoadTexture("./textures/tilemap/plataforma.png");
-    plataforma.initialPosition = (Vector2) {640, 180};
-    plataforma.direction = 1;
-    plataforma.rectangle.width = 96;
-    plataforma.rectangle.height = 32;
-    plataforma.rectangle.x = plataforma.initialPosition.x;
-    plataforma.rectangle.y = plataforma.initialPosition.y;
-    plataforma.speed = 75;
     
+    //inicializar plataformas flutuantes 
+    Vector2 positionsPlatforms[] = {{640, 180}, {1680,256}};
+    int platformsLength = sizeof(positionsPlatforms)/sizeof(positionsPlatforms[0]);
+    Platforms platform[2];
+    for(int i = 0; i < platformsLength; i++){
+        initiateFloatingPlatform(&platform[i], positionsPlatforms[i]);
+    }
+
     //inicializa os peoes
-    Vector2 positions[] = {{256, 216}, {2200,120}};
-    int pawnsLength = sizeof(positions)/sizeof(positions[0]);
+    Vector2 positionsPawns[] = {{256, 216}, {2200,120}};
+    int pawnsLength = sizeof(positionsPawns)/sizeof(positionsPawns[0]);
     Enemy pawns[2];
     for(int i = 0; i < pawnsLength; i++){
-        initiatePawn(&pawns[i], positions[i]);
+        initiatePawn(&pawns[i], positionsPawns[i]);
     }
     //Iniciar audio
     Audio audio;
     InitAudioDevice();
-    //audio.select = LoadSound("audio/selection.mp3");
+    initiateAudio(&audio);
+    PlayMusicStream(audio.game);
+    PlayMusicStream(audio.menu);
+    SetMusicVolume(audio.menu, 0.7);
+    SetMusicVolume(audio.game, 0.7);
 
     float playerTimer = 0;
     int playerFrame = 0;
@@ -209,10 +207,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         help = 0;
         switch(Option){
             case MENU:
+                UpdateMusicStream(audio.menu);
                 if(IsKeyPressed(KEY_ENTER)){
                     Option = PLAY; pause = 0;
+                    PlaySound(audio.select);
                 } else if(IsKeyPressed(KEY_C)){
                     Option = CREDITS;
+                    PlaySound(audio.select);
                 }
                 break;
             case PLAY:
@@ -229,9 +230,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     if(player.playerState == 4) pause = 1, Option = MENU;
 
                     if(!pause){
+                        UpdateMusicStream(audio.game);
                         float deltaTime = GetFrameTime();
                         updateCamera(&camera, &player, screenWidth, screenHeight);
-                        updatePlayer(&player, deltaTime, envItems, envItemsLength, &audio);
+                        updatePlayer(&player, deltaTime, envItems, envItemsLength, platform, platformsLength, &audio);
 
                         BeginDrawing();
                         BeginMode2D(camera);
@@ -242,26 +244,17 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         //movimento da primeira plataforma 
                         platformTimer += GetFrameTime();
                         if(platformTimer >= 0.01){
-                            platformTimer = 0;
-                            if(plataforma.rectangle.x >= plataforma.initialPosition.x+64){
-                                plataforma.direction = -1;
-                            }else if(plataforma.rectangle.x <= plataforma.initialPosition.x-64){
-                                plataforma.direction = 1;
+                            for(int i = 0; i < platformsLength; i++){
+                                platformTimer = 0;
+                                if(platform[i].rectangle.x >= platform[i].initialPosition.x+128){
+                                    platform[i].direction = -1;
+                                }else if(platform[i].rectangle.x <= platform[i].initialPosition.x-128){
+                                    platform[i].direction = 1;
+                                }
+                                platform[i].rectangle.x += platform[i].speed*platform[i].direction*deltaTime;
                             }
-                            plataforma.rectangle.x += plataforma.speed*plataforma.direction*deltaTime;
                         }
-                        /* envItems[i].rect.y >= player->position.y && 
-                        envItems[i].rect.y < player->position.y + player->vSpeed*deltaTime */
-                        if (plataforma.rectangle.x <= player.position.x+player.frame.width-5 && //esquerda
-                            player.position.x <= plataforma.rectangle.x+plataforma.rectangle.width && //direita
-                            plataforma.rectangle.y >= player.position.y &&
-                            plataforma.rectangle.y < player.position.y + player.vSpeed*deltaTime){
-                            player.canJump = 1;
-                            player.vSpeed = 0.0f;
-                            player.position.y = plataforma.rectangle.y;
-                            player.position.x += plataforma.speed*plataforma.direction*deltaTime;
-                        }
-
+                            
                         pawnTimer += GetFrameTime();
                         //move  o inimigo
                         if(pawnTimer >= 0.02){
@@ -293,10 +286,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                         DrawTextureV(sky, (Vector2){0,0}, WHITE);
 
-
-                        // DrawTextureV(pawn.texture, (Vector2) {pawn.rectangle.x,pawn.rectangle.y}, WHITE);
-
-                        //for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color); //desenha os obstaculos
                         for (int i = 0; i < envItemsLength; i++){
                             if(envItems[i].hasTexture){
                                 if(envItems[i].isLava){
@@ -332,7 +321,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         }
 
                         //desenha a plataforma
-                        DrawTextureV(plataforma.texture, (Vector2) {plataforma.rectangle.x, plataforma.rectangle.y}, WHITE);
+                        for(int i = 0; i < platformsLength; i++){
+                            DrawTextureV(platform[i].texture, (Vector2) {platform[i].rectangle.x, platform[i].rectangle.y}, WHITE);
+                        }
+                        
 
                         EndMode2D();
                         DrawText(TextFormat("VIDAS: %d", player.vida), 760, 40, 20, RAYWHITE);
@@ -341,9 +333,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         //jogo pausado
                         BeginDrawing();
                         if(player.vida == 0){
+                            UpdateMusicStream(audio.menu);
                             ClearBackground(SKYBLUE);
                             DrawTextEx(font, "GAME OVER\nMENU - M", (Vector2){175, 100}, 35, 8, RED);
                             if(IsKeyPressed(KEY_M)){
+                                PlaySound(audio.select);
                                 Option = MENU;
                                 initiatePlayer(&player);
                                 player.playerState = 0;
@@ -372,7 +366,12 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(player.falling.texture);
                     UnloadTexture(player.jumping.texture);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
+                    for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
+                    UnloadMusicStream(audio.menu);
+                    UnloadMusicStream(audio.game);
                     UnloadSound(audio.jump);
+                    UnloadSound(audio.damage);
+                    UnloadSound(audio.select);
                     CloseAudioDevice();
                     CloseWindow();
                 }c=0;
@@ -384,6 +383,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                     if (text2){
                         while(!WindowShouldClose()){
+                            UpdateMusicStream(audio.menu);
                             if(IsKeyPressed(KEY_ESCAPE)){
                                 Option = MENU;
                                 help = 1;
@@ -424,9 +424,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(player.falling.texture);
                     UnloadTexture(player.jumping.texture);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
-                    /*UnloadSound(audio.jump);
+                    for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
+                    UnloadMusicStream(audio.menu);
+                    UnloadMusicStream(audio.game);
+                    UnloadSound(audio.jump);
+                    UnloadSound(audio.damage);
+                    UnloadSound(audio.select);
                     CloseAudioDevice();
-                    */
                     CloseWindow();
                 }
 

@@ -1,13 +1,15 @@
 #include "updatePlayer.h"
 #include "audio.h"
+#include "stdio.h"
 
 //Funcao pra atualizar as variaveis do player
-void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envItemsLength, Audio *audio){
+void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envItemsLength, Platforms *platform, int platformsLength, Audio *audio){
 
     int hitFloor = 0;
     int hitWall = 0; // -1=esquerda e 1=direita
 
     //audio->jump = LoadSound("audio/jump.mp3");
+    //audio->damage = LoadSound("audio/damage.mp3");
     
     //verifica as colisoes com cada obstaculo
     for (int i = 0; i < envItemsLength; i++){
@@ -21,6 +23,7 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
                 if(envItems[i].isLava){
                     //mata o player
                     player->vida--;
+                    if(player->vida != 0) PlaySound(audio->damage);
                     player->color = RED;
                     player->vSpeed = -player->jumpS/2;
                     player->playerState = 4;
@@ -29,19 +32,62 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
         
         //detecta colosioes laterais
         if (envItems[i].rect.y < player->position.y && //se o topo do obstaculo esta acima do p
-            (player->position.y-player->frame.height)<envItems[i].rect.y+envItems[i].rect.height && //se o pe do obstaculo esta acima do p
+            (player->position.y - player->frame.height) < envItems[i].rect.y + envItems[i].rect.height && //se o pe do obstaculo esta acima do p
             player->position.x > envItems[i].rect.x && //se o obstaculo esta a esquerda do p
-            player->position.x-(envItems[i].rect.x+envItems[i].rect.width) < 1){ // se a diferenca entre o x do p e do obstaculo e < 3
+            player->position.x - (envItems[i].rect.x + envItems[i].rect.width) < 1){ // se a diferenca entre o x do p e do obstaculo e < 3
             hitWall = -1; 
             //printf(" Tem uma parede na esquerda ");
         }
         if (envItems[i].rect.y < player->position.y &&
-            (player->position.y-player->frame.height)<envItems[i].rect.y+envItems[i].rect.height &&
+            (player->position.y - player->frame.height) < envItems[i].rect.y + envItems[i].rect.height &&
             player->position.x < envItems[i].rect.x &&
-            envItems[i].rect.x-(player->position.x+player->frame.width) < 1){
+            envItems[i].rect.x - (player->position.x + player->frame.width) < 1){
             hitWall = 1; 
                 //printf("Tem uma parede na direita");
         }
+    
+    }
+
+    //verifica as colisoes com plataforma flutuante 
+    for (int i = 0; i < platformsLength; i++){
+        if (platform[i].rectangle.x <= player->position.x + 15 &&
+            platform[i].rectangle.x + platform[i].rectangle.width >= player->position.x &&
+            platform[i].rectangle.y >= player->position.y && 
+            platform[i].rectangle.y < player->position.y + player->vSpeed*deltaTime
+            /*platform[i].rectangle.x <= player->position.x + player->frame.width-5 && //esquerda
+        player->position.x <= platform[i].rectangle.x + platform[i].rectangle.width && //direita
+        platform[i].rectangle.y >= player->position.y &&
+        platform[i].rectangle.y < player->position.y + player->vSpeed*deltaTime*/){
+            hitFloor = 1;
+            player->vSpeed = 0.0f;
+            player->position.y = platform[i].rectangle.y;
+            player->position.x += platform[i].speed*platform[i].direction*deltaTime;
+        }
+
+        //detecta colosioes laterais
+        if (platform[i].rectangle.y < player->position.y && //se o topo do obstaculo esta acima do p
+            (player->position.y - player->frame.height) < platform[i].rectangle.y + platform[i].rectangle.height && //se o pe do obstaculo esta acima do p
+            player->position.x > platform[i].rectangle.x && //se o obstaculo esta a esquerda do p
+            player->position.x - (platform[i].rectangle.x + platform[i].rectangle.width) < 1){ // se a diferenca entre o x do p e do obstaculo e < 3
+            hitWall = -1; 
+            //printf(" Tem uma parede na esquerda ");
+        }
+        if (platform[i].rectangle.y < player->position.y &&
+            (player->position.y - player->frame.height) < platform[i].rectangle.y + platform[i].rectangle.height &&
+            player->position.x < platform[i].rectangle.x &&
+            platform[i].rectangle.x - (player->position.x + player->frame.width) < 1){
+            hitWall = 1; 
+                //printf("Tem uma parede na direita");
+        }
+        if (platform[i].rectangle.x <= player->position.x + 15 &&
+            platform[i].rectangle.x + platform[i].rectangle.width >= player->position.x &&
+            player->position.y - (platform[i].rectangle.y + platform[i].rectangle.height) < 2){
+                player->position.y = platform[i].rectangle.y + platform[i].rectangle.height;
+                player->vSpeed *= -1;
+                printf("Tem uma parede acima");
+                //precisa parar o puloooo
+        }
+        
     
     }
 

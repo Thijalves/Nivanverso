@@ -9,7 +9,7 @@ typedef struct {
     int speed;
     Vector2 initialPosition;
     char direction; //-1 esquerda | 1 direita
-} Platform;
+} Platforms;
 
 
 #endif

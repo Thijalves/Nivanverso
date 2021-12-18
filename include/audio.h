@@ -13,4 +13,6 @@ typedef struct{
     Sound step;
 } Audio;
 
+void initiateAudio(Audio *audio);
+
 #endif
