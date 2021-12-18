@@ -14,7 +14,7 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
     //verifica as colisoes com cada obstaculo
     for (int i = 0; i < envItemsLength; i++){
         if (envItems[i].rect.x <= player->position.x + 15 &&
-            envItems[i].rect.x + envItems[i].rect.width >= player->position.x &&
+            envItems[i].rect.x + envItems[i].rect.width - 10 >= player->position.x &&
             envItems[i].rect.y >= player->position.y && 
             envItems[i].rect.y < player->position.y + player->vSpeed*deltaTime){
                 hitFloor = 1;

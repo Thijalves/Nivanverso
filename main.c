@@ -174,7 +174,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     initiatePlayer(&player);
     
     //inicializar plataformas flutuantes 
-    Vector2 positionsPlatforms[] = {{1680,256}, {3200, 224}};
+    Vector2 positionsPlatforms[] = {{1680,256}};
     int platformsLength = sizeof(positionsPlatforms)/sizeof(positionsPlatforms[0]);
     // Platforms platform[2];
     Platforms *platform = (Platforms *)malloc(platformsLength * sizeof(Platforms));
@@ -182,8 +182,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         initiateFloatingPlatform(&platform[i], positionsPlatforms[i]);
     }
 
-    //inicializa as torres
-    Vector2 positionsRooks[] = {{256, 214}, {4200, 214}};
+    //inicializa as torres 
+    Vector2 positionsRooks[] = {{3030, 184}, {4200, 214}, {4870, 248}, {5270, 248}};
     int rooksLength = sizeof(positionsRooks)/sizeof(positionsRooks[0]);
     // Enemy rooks[2];
     Enemy *rooks = (Enemy *)malloc(rooksLength * sizeof(Enemy));
@@ -191,8 +191,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         initiateRook(&rooks[i], positionsRooks[i]);
     }
 
-    //inicializa os peoes
-    Vector2 positionsPawns[] = {{2200,120}};
+    //inicializa os peoes 
+    Vector2 positionsPawns[] = {{2200,120}, {2800,184}, {3512, 184}, {5070, 248}};
     int pawnsLength = sizeof(positionsPawns)/sizeof(positionsPawns[0]);
     // Enemy pawns[2];
     Enemy *pawns = (Enemy *)malloc(pawnsLength * sizeof(Enemy));
@@ -259,8 +259,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         DrawText("Vidas", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
                         ClearBackground((Color){ 58, 111, 247, 255 });
 
-                        // printf("Posicao x do player: %f\n", player.position.x);
-                        // printf("Posicao y do player: %f\n", player.position.y);
+                        printf("Posicao x do player: %f\n", player.position.x);
+                        printf("Posicao y do player: %f\n", player.position.y);
 
                         //movimento das plataformas 
                         platformTimer += GetFrameTime();
@@ -294,10 +294,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             for(int i = 0; i < rooksLength; i++){
                                 torreTimer = 0;
                                 if(fabs(player.position.x - rooks[i].rectangle.x) <= 128){
-                                    if(player.position.x > rooks[i].rectangle.x && rooks[i].rectangle.x - rooks[i].initialPosition.x < 160){
+                                    if(player.position.x > rooks[i].rectangle.x && rooks[i].rectangle.x - rooks[i].initialPosition.x < 140){
                                         rooks[i].direction = 1;
                                         rooks[i].rectangle.x += rooks[i].direction*rooks[i].speed*deltaTime;
-                                    }else if(player.position.x < rooks[i].rectangle.x && rooks[i].rectangle.x - rooks[i].initialPosition.x > -160){
+                                    }else if(player.position.x < rooks[i].rectangle.x && rooks[i].rectangle.x - rooks[i].initialPosition.x > -140){
                                         rooks[i].direction = -1;
                                         rooks[i].rectangle.x += rooks[i].direction*rooks[i].speed*deltaTime;
                                     }
@@ -403,7 +403,12 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                                 PlaySound(audio.select);
                                 Option = MENU;
                                 initiatePlayer(&player);
-                                player.playerState = 0;
+                                for(int i = 0; i < pawnsLength; i++){
+                                    initiatePawn(&pawns[i], positionsPawns[i]);
+                                } 
+                                for(int i = 0; i < rooksLength; i++){
+                                    initiateRook(&rooks[i], positionsRooks[i]);
+                                }player.playerState = 0;
                                 player.vida = 3;
                                 break;
                             }
