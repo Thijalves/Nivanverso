@@ -28,4 +28,11 @@ typedef struct {
     int vida;
 } Player;
 
+typedef struct {
+    Rectangle frame;
+    Vector2 position;
+    Sprite sprite;
+    Color color;
+} Npc;
+
 #endif 

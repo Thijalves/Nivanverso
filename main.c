@@ -171,6 +171,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     //instancia o player com a animacao idle
     Player player = {0};
+    Npc navin = {0};
+    Npc nivanocito = {0};
+    nivanocito.sprite.texture = LoadTexture("./textures/nivanocito.png");
+    navin.sprite.texture = LoadTexture("./textures/navin.png");
+    initiateNpc(&navin, (Vector2){247, 220});
+    initiateNpc(&nivanocito, (Vector2){2650, 61});
+
     initiatePlayer(&player);
     
     //inicializar plataformas flutuantes 
@@ -209,7 +216,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     SetMusicVolume(audio.game, 0.1);
     
     int playerFrame = 0;
+    int npcFrame = 0;
 
+    float npcTimer = 0;
     float playerTimer = 0;
     float platformTimer = 0;
     float torreTimer = 0;
@@ -340,6 +349,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         playerFrame = playerFrame % player.idle.maxFrames;
                         player.frame.x = (player.frame.width*playerFrame);
 
+                        navin.frame.x = (navin.frame.width*playerFrame);
+                        nivanocito.frame.x = (nivanocito.frame.width*playerFrame);                 
+
                         DrawTextureV(sky, (Vector2){0,0}, WHITE);
 
                         for (int i = 0; i < envItemsLength; i++){
@@ -366,7 +378,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                                 }
                             }
                         }
-
+                        
+                        DrawTextureRec(navin.sprite.texture, (Rectangle){navin.frame.x, navin.frame.y, -navin.frame.width, navin.frame.height}, navin.position, navin.color);
+                        DrawTextureRec(nivanocito.sprite.texture, (Rectangle){nivanocito.frame.x, nivanocito.frame.y, -nivanocito.frame.width, nivanocito.frame.height}, nivanocito.position, nivanocito.color);
                         drawPlayer(&player); //desenha o player
                         //desenha os peoes
                         for(int i = 0; i < pawnsLength; i++){
@@ -433,6 +447,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(player.runLeft.texture);
                     UnloadTexture(player.falling.texture);
                     UnloadTexture(player.jumping.texture);
+                    UnloadTexture(navin.sprite.texture);
+                    UnloadTexture(nivanocito.sprite.texture);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
                     UnloadMusicStream(audio.menu);
@@ -495,6 +511,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(player.runLeft.texture);
                     UnloadTexture(player.falling.texture);
                     UnloadTexture(player.jumping.texture);
+                    UnloadTexture(navin.sprite.texture);
+                    UnloadTexture(nivanocito.sprite.texture);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
                     UnloadMusicStream(audio.menu);

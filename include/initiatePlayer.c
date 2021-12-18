@@ -2,7 +2,7 @@
 
 void initiatePlayer(Player *player){
     player->color = WHITE;
-    player->hSpeed = 150; //era 150
+    player->hSpeed = 500; //era 150
     player->vSpeed = 0;
     player->jumpS = 250;
     player->idle.texture = LoadTexture("./textures/idle.png");
@@ -31,4 +31,13 @@ void initiatePlayer(Player *player){
     //sprite caindo
     player->falling.texture = LoadTexture("./textures/falling.png");
     player->falling.maxFrames = 1;
+}
+void initiateNpc(Npc *npc, Vector2 position){
+    npc->color = WHITE;
+    npc->sprite.maxFrames = 12;
+    npc->position = position;
+    npc->frame.x = 0.0f;
+    npc->frame.y = 0.0f;
+    npc->frame.width = (float)npc->sprite.texture.width/npc->sprite.maxFrames;
+    npc->frame.height = (float)npc->sprite.texture.height;
 }

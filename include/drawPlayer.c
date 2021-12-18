@@ -7,15 +7,6 @@ void drawPlayer(Player *player){
 
     invertedFrame.width = -player->frame.width; //frame com comprimento invertido
 
-    //conta os frames para animacao
-    /* *playerTimer += GetFrameTime();
-    if(*playerTimer >= 0.075){
-        *playerTimer=0;
-        (*frame)++;
-    }
-    *frame = *frame % player->idle.maxFrames;
-    player->frame.x = (player->frame.width*(*frame));
-    */
     //anima de acordo com o estado
     switch(player->playerState){
         case 0: //boneco parado

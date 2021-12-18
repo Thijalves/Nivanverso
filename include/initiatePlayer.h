@@ -6,4 +6,6 @@
 
 void initiatePlayer(Player *player);
 
+void initiateNpc(Npc *npc, Vector2 position);
+
 #endif
