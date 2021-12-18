@@ -20,7 +20,7 @@ void initiatePawn(Enemy *pawn, Vector2 position){
     pawn->isAlive = 1;
 }
 void hitPawn(Enemy *pawn, Player *player, Audio *audio){
-    audio->jump = LoadSound("audio/jump.mp3");
+    //audio->jump = LoadSound("audio/jump.mp3");
     if(player->position.x + player->frame.width >= pawn->rectangle.x &&
         player->position.x <= pawn->rectangle.x + pawn->rectangle.width &&
         player->position.y >= pawn->rectangle.y){
