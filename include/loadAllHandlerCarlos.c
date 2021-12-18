@@ -6,10 +6,13 @@ void loadAll(FILE **file, Texture2D *grassSingle, Texture2D *GrassIntenalEdgeL, 
              ,Texture2D *grassWallLeft, Texture2D *grassEdgeRight, Texture2D *grassEdgeLeft, Texture2D *grass, Texture2D *GrassIntenalEdgeD, Font *font, char **text, char **text2, Texture2D *sky
             ){
     FILE *mapFile = fopen("./data/fase3.txt","r");
+    // FILE *mapFile = fopen("./data/faseTeste.txt","r");
+    
     if(mapFile == NULL)
-    printf("erro ao abrir arquivo\n");
-    else{
-    *file = mapFile;}
+        printf("erro ao abrir arquivo\n");
+    else
+        *file = mapFile;
+    
     Texture2D grassAlone = LoadTexture("./textures/tilemap/miolinho.png");
     *grassSingle = grassAlone;
     Texture2D InternalGrass = LoadTexture("./textures/tilemap/subidaE.png");

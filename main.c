@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 #include "structPlayer.h"
 #include "envItemsStruct.h"
 #include "enemyStruct.h"
@@ -37,35 +38,37 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     int framesCounter=0;
     Selection Option = MENU;
 
-    //generateMap();
-
     const int screenWidth = 900;
     const int screenHeight = 544;
 
     InitWindow(screenWidth, screenHeight, "Nivan no nivanverso");
 
-    int mapWidth;
-
-    fseek(mapFile, -11, SEEK_END);
-
-    fscanf(mapFile, "width: %d", &mapWidth);
-
-    printf("Largura do mapa: %d\n", mapWidth);
-
-    EnvItem envItems[3000];
-
-    fseek(mapFile, 0, SEEK_SET);
-
-
     Font font;
     SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
 
     Texture2D grassSingle, GrassIntenalEdgeL, lava, dirt, grassWallRight, grassWallLeft, grassEdgeRight, grassEdgeLeft, grass, GrassIntenalEdgeD, sky;
+
     loadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD,
     &font, &text, &text2, &sky);
 
+
+
+    int mapWidth;
+
+    fseek(mapFile, -5, SEEK_END);
+
+    fscanf(mapFile, "%d", &mapWidth);
+
+    printf("Largura do mapa: %d\n", mapWidth);
+
+    // EnvItem envItems[3000];
+    EnvItem *envItems = (EnvItem *) malloc((mapWidth*10) * sizeof(EnvItem));
+
+    fseek(mapFile, 0, SEEK_SET);
+
+
     int posx = 0, posy = 0;
-    for(int i = 0; i < 3000; i++){
+    for(int i = 0; i < mapWidth*10; i++){
         char block;
 
         fscanf(mapFile, "%c", &block);
@@ -155,7 +158,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 break;
         }
 
-        if(posx % 299*32 == 0 && posx != 0){
+        if(posx % (mapWidth-1)*32 == 0 && posx != 0){
             posy += 32;
             posx = 0;
         } else {
@@ -163,7 +166,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         }
     }
 
-    int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
+    // int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
+    int envItemsLength = mapWidth*10;
 
     //instancia o player com a animacao idle
     Player player = {0};
@@ -172,7 +176,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     //inicializar plataformas flutuantes 
     Vector2 positionsPlatforms[] = {{1680,256}, {3200, 224}};
     int platformsLength = sizeof(positionsPlatforms)/sizeof(positionsPlatforms[0]);
-    Platforms platform[2];
+    // Platforms platform[2];
+    Platforms *platform = (Platforms *)malloc(platformsLength * sizeof(Platforms));
     for(int i = 0; i < platformsLength; i++){
         initiateFloatingPlatform(&platform[i], positionsPlatforms[i]);
     }
@@ -180,28 +185,17 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     //inicializa as torres
     Vector2 positionsRooks[] = {{256, 214}, {4200, 214}};
     int rooksLength = sizeof(positionsRooks)/sizeof(positionsRooks[0]);
-    Enemy rooks[2];
+    // Enemy rooks[2];
+    Enemy *rooks = (Enemy *)malloc(rooksLength * sizeof(Enemy));
     for(int i = 0; i < rooksLength; i++){
         initiateRook(&rooks[i], positionsRooks[i]);
     }
 
-    //Enemy torre = {0};
-    //torre.texture = LoadTexture("./textures/inimigo/torre.png");
-    //torre.isAlive = 1;
-    //torre.speed = 200;
-    //torre.direction = 1;
-    //torre.type = 't';
-    //torre.color = WHITE;
-    //torre.rectangle.height = 42;
-    //torre.rectangle.width = 20;
-    //torre.initialPosition = (Vector2) {256, 256};
-    //torre.rectangle.x = torre.initialPosition.x;
-    //torre.rectangle.y = torre.initialPosition.y - torre.rectangle.height;
-
     //inicializa os peoes
     Vector2 positionsPawns[] = {{2200,120}};
     int pawnsLength = sizeof(positionsPawns)/sizeof(positionsPawns[0]);
-    Enemy pawns[2];
+    // Enemy pawns[2];
+    Enemy *pawns = (Enemy *)malloc(pawnsLength * sizeof(Enemy));
     for(int i = 0; i < pawnsLength; i++){
         initiatePawn(&pawns[i], positionsPawns[i]);
     }
@@ -265,7 +259,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         DrawText("Vidas", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
                         ClearBackground((Color){ 58, 111, 247, 255 });
 
-                         printf("Posicao x do player: %f\n", player.position.x);
+                        // printf("Posicao x do player: %f\n", player.position.x);
                         // printf("Posicao y do player: %f\n", player.position.y);
 
                         //movimento das plataformas 
@@ -322,6 +316,12 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                                     pawns[i].direction = 1;
                                 }
                                 pawns[i].rectangle.x += pawns[i].direction*pawns[i].speed*deltaTime;
+                            }
+                        }
+
+                        for(int i = 0; i < rooksLength; i++){
+                            if(rooks[i].isAlive){
+                                hitRook(&rooks[i], &player, &audio);
                             }
                         }
 
@@ -432,6 +432,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
                     UnloadMusicStream(audio.menu);
                     UnloadMusicStream(audio.game);
+                    free(platform);
+                    free(rooks);
+                    free(pawns);
+                    free(envItems);
                     UnloadSound(audio.jump);
                     UnloadSound(audio.damage);
                     UnloadSound(audio.select);
@@ -492,6 +496,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadMusicStream(audio.game);
                     UnloadSound(audio.jump);
                     UnloadSound(audio.damage);
+                    free(platform);
+                    free(rooks);
+                    free(pawns);
+                    free(envItems);
                     UnloadSound(audio.select);
                     CloseAudioDevice();
                     CloseWindow();
