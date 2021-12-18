@@ -12,6 +12,7 @@
 #include "loadAllHandlerCarlos.h"
 #include "UnloadAllCarlos.h"
 #include "pawn.h"
+#include "rook.h"
 #include "audio.h"
 #include "platformStruct.h"
 #include "floatingPlatform.h"
@@ -176,19 +177,26 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         initiateFloatingPlatform(&platform[i], positionsPlatforms[i]);
     }
 
-    //inicializa as tores
-    Enemy torre = {0};
-    torre.texture = LoadTexture("./textures/inimigo/torre.png");
-    torre.isAlive = 1;
-    torre.speed = 200;
-    torre.direction = 1;
-    torre.type = 't';
-    torre.color = WHITE;
-    torre.rectangle.height = 42;
-    torre.rectangle.width = 20;
-    torre.initialPosition = (Vector2) {256, 256};
-    torre.rectangle.x = torre.initialPosition.x;
-    torre.rectangle.y = torre.initialPosition.y - torre.rectangle.height;
+    //inicializa as torres
+    Vector2 positionsRooks[] = {{256, 214}, {4200, 214}};
+    int rooksLength = sizeof(positionsRooks)/sizeof(positionsRooks[0]);
+    Enemy rooks[2];
+    for(int i = 0; i < rooksLength; i++){
+        initiateRook(&rooks[i], positionsRooks[i]);
+    }
+
+    //Enemy torre = {0};
+    //torre.texture = LoadTexture("./textures/inimigo/torre.png");
+    //torre.isAlive = 1;
+    //torre.speed = 200;
+    //torre.direction = 1;
+    //torre.type = 't';
+    //torre.color = WHITE;
+    //torre.rectangle.height = 42;
+    //torre.rectangle.width = 20;
+    //torre.initialPosition = (Vector2) {256, 256};
+    //torre.rectangle.x = torre.initialPosition.x;
+    //torre.rectangle.y = torre.initialPosition.y - torre.rectangle.height;
 
     //inicializa os peoes
     Vector2 positionsPawns[] = {{2200,120}};
@@ -256,9 +264,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         BeginMode2D(camera);
                         DrawText("Vidas", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
                         ClearBackground((Color){ 58, 111, 247, 255 });
-                        //DarkBlue{ 0, 82, 172, 255 } Blue{{ 0, 121, 241, 255 }}
 
-                        // printf("Posicao x do player: %f\n", player.position.x);
+                         printf("Posicao x do player: %f\n", player.position.x);
                         // printf("Posicao y do player: %f\n", player.position.y);
 
                         //movimento das plataformas 
@@ -290,15 +297,16 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         torreTimer += GetFrameTime();
                         //move  o inimigo
                         if(torreTimer >= 0.02){
-                            torreTimer = 0;
-
-                            if(fabs(player.position.x - torre.rectangle.x) <= 128){
-                                if(player.position.x > torre.rectangle.x && torre.rectangle.x - torre.initialPosition.x < 160){
-                                    torre.direction = 1;
-                                    torre.rectangle.x += torre.direction*torre.speed*deltaTime;
-                                }else if(player.position.x < torre.rectangle.x && torre.rectangle.x - torre.initialPosition.x > -160){
-                                    torre.direction = -1;
-                                    torre.rectangle.x += torre.direction*torre.speed*deltaTime;
+                            for(int i = 0; i < rooksLength; i++){
+                                torreTimer = 0;
+                                if(fabs(player.position.x - rooks[i].rectangle.x) <= 128){
+                                    if(player.position.x > rooks[i].rectangle.x && rooks[i].rectangle.x - rooks[i].initialPosition.x < 160){
+                                        rooks[i].direction = 1;
+                                        rooks[i].rectangle.x += rooks[i].direction*rooks[i].speed*deltaTime;
+                                    }else if(player.position.x < rooks[i].rectangle.x && rooks[i].rectangle.x - rooks[i].initialPosition.x > -160){
+                                        rooks[i].direction = -1;
+                                        rooks[i].rectangle.x += rooks[i].direction*rooks[i].speed*deltaTime;
+                                    }
                                 }
                             }
                         }
@@ -367,12 +375,19 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
 
+                        //desenha as torres
+                        for(int i = 0; i < rooksLength; i++){
+                            if(rooks[i].isAlive){
+                                DrawTextureV(rooks[i].texture, (Vector2) {rooks[i].rectangle.x,rooks[i].rectangle.y}, WHITE);
+                            }
+                        }
+
                         //desenha a plataforma
                         for(int i = 0; i < platformsLength; i++){
                             DrawTextureV(platform[i].texture, (Vector2) {platform[i].rectangle.x, platform[i].rectangle.y}, WHITE);
                         }
 
-                        DrawTextureV(torre.texture, (Vector2){torre.rectangle.x, torre.rectangle.y}, torre.color);
+                        //DrawTextureV(torre.texture, (Vector2){torre.rectangle.x, torre.rectangle.y}, torre.color);
                         
                         EndMode2D();
                         DrawText(TextFormat("VIDAS: %d", player.vida), 760, 40, 20, RAYWHITE);
