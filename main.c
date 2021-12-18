@@ -168,7 +168,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     initiatePlayer(&player);
     
     //inicializar plataformas flutuantes 
-    Vector2 positionsPlatforms[] = {{640, 180}, {1680,256}};
+    Vector2 positionsPlatforms[] = {{1680,256}, {3200, 224}};
     int platformsLength = sizeof(positionsPlatforms)/sizeof(positionsPlatforms[0]);
     Platforms platform[2];
     for(int i = 0; i < platformsLength; i++){
@@ -188,8 +188,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     initiateAudio(&audio);
     PlayMusicStream(audio.game);
     PlayMusicStream(audio.menu);
-    SetMusicVolume(audio.menu, 0.7);
-    SetMusicVolume(audio.game, 0.7);
+    SetMusicVolume(audio.menu, 0.1);
+    SetMusicVolume(audio.game, 0.1);
 
     float playerTimer = 0;
     int playerFrame = 0;
@@ -241,7 +241,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         ClearBackground((Color){ 58, 111, 247, 255 });
                         //DarkBlue{ 0, 82, 172, 255 } Blue{{ 0, 121, 241, 255 }}
 
-                        //movimento da primeira plataforma 
+                        printf("Posicao x do player: %f\n", player.position.x);
+                        printf("Posicao y do player: %f\n", player.position.y);
+
+                        //movimento das plataformas 
                         platformTimer += GetFrameTime();
                         if(platformTimer >= 0.01){
                             for(int i = 0; i < platformsLength; i++){
@@ -251,9 +254,21 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                                 }else if(platform[i].rectangle.x <= platform[i].initialPosition.x-128){
                                     platform[i].direction = 1;
                                 }
+                                
                                 platform[i].rectangle.x += platform[i].speed*platform[i].direction*deltaTime;
+                                if (platform[i].rectangle.x <= player.position.x+player.frame.width-5 && //esquerda
+                                    player.position.x <= platform[i].rectangle.x+platform[i].rectangle.width && //direita
+                                    platform[i].rectangle.y >= player.position.y &&
+                                    platform[i].rectangle.y < player.position.y + player.vSpeed*deltaTime){
+                                    player.canJump = 1;
+                                    player.vSpeed = 0.0f;
+                                    player.position.y = platform[i].rectangle.y;
+                                    player.position.x += platform[i].speed*platform[i].direction*deltaTime;
+                                }
+                                
                             }
                         }
+                        
                             
                         pawnTimer += GetFrameTime();
                         //move  o inimigo
@@ -382,7 +397,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 if ("./data/credits.txt" != NULL){
 
                     if (text2){
-                        while(!WindowShouldClose()){
+                        while(1){
                             UpdateMusicStream(audio.menu);
                             if(IsKeyPressed(KEY_ESCAPE)){
                                 Option = MENU;
@@ -392,7 +407,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             BeginDrawing();
                             ClearBackground(WHITE);
                             DrawText(text2, 190, 200, 20, BLUE);
-                            DrawText("E - fechar\nESC - retornar", 400, 250, 20, BLACK);
+                            DrawText("ESC - retornar", 400, 250, 20, BLACK);
                             EndDrawing();
                         }
                     }

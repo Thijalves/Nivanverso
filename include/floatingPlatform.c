@@ -2,7 +2,7 @@
     
 void initiateFloatingPlatform(Platforms *platform, Vector2 position){    
     platform->texture = LoadTexture("./textures/tilemap/plataforma.png");
-    platform->initialPosition = (Vector2) position;
+    platform->initialPosition = position;
     platform->direction = 1;
     platform->rectangle.width = 96;
     platform->rectangle.height = 32;

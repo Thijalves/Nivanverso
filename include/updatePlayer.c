@@ -48,46 +48,27 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
     
     }
 
-    //verifica as colisoes com plataforma flutuante 
+    // verifica as colisoes com plataforma flutuante 
     for (int i = 0; i < platformsLength; i++){
-        if (platform[i].rectangle.x <= player->position.x + 15 &&
-            platform[i].rectangle.x + platform[i].rectangle.width >= player->position.x &&
-            platform[i].rectangle.y >= player->position.y && 
-            platform[i].rectangle.y < player->position.y + player->vSpeed*deltaTime
-            /*platform[i].rectangle.x <= player->position.x + player->frame.width-5 && //esquerda
-        player->position.x <= platform[i].rectangle.x + platform[i].rectangle.width && //direita
-        platform[i].rectangle.y >= player->position.y &&
-        platform[i].rectangle.y < player->position.y + player->vSpeed*deltaTime*/){
-            hitFloor = 1;
-            player->vSpeed = 0.0f;
-            player->position.y = platform[i].rectangle.y;
-            player->position.x += platform[i].speed*platform[i].direction*deltaTime;
-        }
-
         //detecta colosioes laterais
         if (platform[i].rectangle.y < player->position.y && //se o topo do obstaculo esta acima do p
             (player->position.y - player->frame.height) < platform[i].rectangle.y + platform[i].rectangle.height && //se o pe do obstaculo esta acima do p
             player->position.x > platform[i].rectangle.x && //se o obstaculo esta a esquerda do p
             player->position.x - (platform[i].rectangle.x + platform[i].rectangle.width) < 1){ // se a diferenca entre o x do p e do obstaculo e < 3
-            hitWall = -1; 
+            hitWall = -1;
+            if(player->facingDirection != platform[i].direction)
+                player->position.x += (platform[i].speed/18) * platform[i].direction;
             //printf(" Tem uma parede na esquerda ");
         }
         if (platform[i].rectangle.y < player->position.y &&
             (player->position.y - player->frame.height) < platform[i].rectangle.y + platform[i].rectangle.height &&
             player->position.x < platform[i].rectangle.x &&
             platform[i].rectangle.x - (player->position.x + player->frame.width) < 1){
-            hitWall = 1; 
-                //printf("Tem uma parede na direita");
+            hitWall = 1;
+            if(player->facingDirection != platform[i].direction)
+                player->position.x += (platform[i].speed/18) * platform[i].direction;
+            //printf("Tem uma parede na direita");
         }
-        if (platform[i].rectangle.x <= player->position.x + 15 &&
-            platform[i].rectangle.x + platform[i].rectangle.width >= player->position.x &&
-            player->position.y - (platform[i].rectangle.y + platform[i].rectangle.height) < 2){
-                player->position.y = platform[i].rectangle.y + platform[i].rectangle.height;
-                player->vSpeed *= -1;
-                printf("Tem uma parede acima");
-                //precisa parar o puloooo
-        }
-        
     
     }
 
