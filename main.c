@@ -240,7 +240,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
                         
-                        for(int i = 0; i < pawnsLength; i++) hitPawn(&pawns[i], &player, &audio);
+                        for(int i = 0; i < pawnsLength; i++){
+                            if(pawns[i].isAlive){
+                                hitPawn(&pawns[i], &player, &audio);
+                            }
+                        }
 
                         //conta os frames para animacao
                         playerTimer += GetFrameTime();
@@ -282,12 +286,12 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
 
-                        printf("Posicao x do player: %f\n", player.position.x);
-                        printf("Posicao y do player: %f\n", player.position.y);
 
                         drawPlayer(&player); //desenha o player
                         for(int i = 0; i < pawnsLength; i++){
-                            DrawTextureV(pawns[i].texture, (Vector2) {pawns[i].rectangle.x,pawns[i].rectangle.y}, WHITE);    
+                            if(pawns[i].isAlive){
+                                DrawTextureV(pawns[i].texture, (Vector2) {pawns[i].rectangle.x,pawns[i].rectangle.y}, WHITE);
+                            }
                         }
 
                         EndMode2D();

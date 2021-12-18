@@ -17,6 +17,7 @@ void initiatePawn(Enemy *pawn, Vector2 position){
     pawn->direction = 1;
     pawn->speed = 50;
     pawn->color = ORANGE;
+    pawn->isAlive = 1;
 }
 void hitPawn(Enemy *pawn, Player *player, Audio *audio){
     audio->jump = LoadSound("audio/jump.mp3");
@@ -25,6 +26,7 @@ void hitPawn(Enemy *pawn, Player *player, Audio *audio){
         player->position.y >= pawn->rectangle.y){
 
         if(player->position.y - pawn->rectangle.y < 5){
+            pawn->isAlive = 0;
             player->vSpeed = -player->jumpS;
             PlaySound(audio->jump);
         }else{
