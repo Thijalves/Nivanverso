@@ -12,6 +12,7 @@
 #include "UnloadAllCarlos.h"
 #include "pawn.h"
 #include "audio.h"
+#include "platformStruct.h"
 
 typedef enum {
     MENU = 0,
@@ -169,6 +170,18 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     //Enemy pawn = {0};
     //initiatePawn(&pawn, (Vector2){256, 216});
 
+    //inicializa a plataforma flutuante
+    Platform plataforma = {0};
+    plataforma.texture = LoadTexture("./textures/tilemap/plataforma.png");
+    plataforma.initialPosition = (Vector2) {640, 180};
+    plataforma.direction = 1;
+    plataforma.rectangle.width = 96;
+    plataforma.rectangle.height = 32;
+    plataforma.rectangle.x = plataforma.initialPosition.x;
+    plataforma.rectangle.y = plataforma.initialPosition.y;
+    plataforma.speed = 75;
+    
+    //inicializa os peoes
     Vector2 positions[] = {{256, 216}, {2200,120}};
     int pawnsLength = sizeof(positions)/sizeof(positions[0]);
     Enemy pawns[2];
@@ -182,6 +195,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     float playerTimer = 0;
     int playerFrame = 0;
+    float platformTimer = 0;
 
     Camera2D camera = { 0 };
     initiateCamera(&camera, player, screenWidth, screenHeight);
@@ -225,9 +239,31 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         ClearBackground((Color){ 58, 111, 247, 255 });
                         //DarkBlue{ 0, 82, 172, 255 } Blue{{ 0, 121, 241, 255 }}
 
-                        pawnTimer += GetFrameTime();
+                        //movimento da primeira plataforma 
+                        platformTimer += GetFrameTime();
+                        if(platformTimer >= 0.01){
+                            platformTimer = 0;
+                            if(plataforma.rectangle.x >= plataforma.initialPosition.x+64){
+                                plataforma.direction = -1;
+                            }else if(plataforma.rectangle.x <= plataforma.initialPosition.x-64){
+                                plataforma.direction = 1;
+                            }
+                            plataforma.rectangle.x += plataforma.speed*plataforma.direction*deltaTime;
+                        }
+                        /* envItems[i].rect.y >= player->position.y && 
+                        envItems[i].rect.y < player->position.y + player->vSpeed*deltaTime */
+                        if (plataforma.rectangle.x <= player.position.x+player.frame.width-5 && //esquerda
+                            player.position.x <= plataforma.rectangle.x+plataforma.rectangle.width && //direita
+                            plataforma.rectangle.y >= player.position.y &&
+                            plataforma.rectangle.y < player.position.y + player.vSpeed*deltaTime){
+                            player.canJump = 1;
+                            player.vSpeed = 0.0f;
+                            player.position.y = plataforma.rectangle.y;
+                            player.position.x += plataforma.speed*plataforma.direction*deltaTime;
+                        }
 
-                        //Desenha o inimigo
+                        pawnTimer += GetFrameTime();
+                        //move  o inimigo
                         if(pawnTimer >= 0.02){
                             for(int i = 0; i < pawnsLength; i++){
                                 pawnTimer = 0;
@@ -246,7 +282,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
 
-                        //conta os frames para animacao
+                        //conta os frames para animacao do player
                         playerTimer += GetFrameTime();
                         if(playerTimer >= 0.075f){
                             playerTimer=0;
@@ -288,11 +324,15 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
 
                         drawPlayer(&player); //desenha o player
+                        //desenha os peoes
                         for(int i = 0; i < pawnsLength; i++){
                             if(pawns[i].isAlive){
                                 DrawTextureV(pawns[i].texture, (Vector2) {pawns[i].rectangle.x,pawns[i].rectangle.y}, WHITE);
                             }
                         }
+
+                        //desenha a plataforma
+                        DrawTextureV(plataforma.texture, (Vector2) {plataforma.rectangle.x, plataforma.rectangle.y}, WHITE);
 
                         EndMode2D();
                         DrawText(TextFormat("VIDAS: %d", player.vida), 760, 40, 20, RAYWHITE);
