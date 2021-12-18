@@ -222,7 +222,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         BeginDrawing();
                         BeginMode2D(camera);
                         DrawText("Vidas", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
-                        ClearBackground(BLUE);
+                        ClearBackground((Color){ 58, 111, 247, 255 });
                         //DarkBlue{ 0, 82, 172, 255 } Blue{{ 0, 121, 241, 255 }}
 
                         pawnTimer += GetFrameTime();
