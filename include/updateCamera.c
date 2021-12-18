@@ -9,15 +9,15 @@ void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenH
     if(player->position.x <= 224){
         x = 225;
     }else if(player->position.x >= 3424){
-        x = 3425;
+        //x = 3425;
     }else{
         x = player->position.x;
     }
 
-    if(player->position.y <= 98){
-        y = player->position.y-32;
+    if(player->position.y <= 128){
+        y = player->position.y-16;
     }else{
-        y = (float)(screenHeight/2- 96);
+        y = (float)(screenHeight/2-96);
     }
 
     camera->target = (Vector2){x, y};

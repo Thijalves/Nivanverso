@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.ejs": "html",
-        "initiatecamera.h": "c"
+        "initiatecamera.h": "c",
+        "platformstruct.h": "c"
     }
 }

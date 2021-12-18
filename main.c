@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include <stdio.h>
+#include <math.h>
 #include "structPlayer.h"
 #include "envItemsStruct.h"
 #include "enemyStruct.h"
@@ -175,8 +176,22 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         initiateFloatingPlatform(&platform[i], positionsPlatforms[i]);
     }
 
+    //inicializa as tores
+    Enemy torre = {0};
+    torre.texture = LoadTexture("./textures/inimigo/torre.png");
+    torre.isAlive = 1;
+    torre.speed = 200;
+    torre.direction = 1;
+    torre.type = 't';
+    torre.color = WHITE;
+    torre.rectangle.height = 42;
+    torre.rectangle.width = 20;
+    torre.initialPosition = (Vector2) {256, 256};
+    torre.rectangle.x = torre.initialPosition.x;
+    torre.rectangle.y = torre.initialPosition.y - torre.rectangle.height;
+
     //inicializa os peoes
-    Vector2 positionsPawns[] = {{256, 216}, {2200,120}};
+    Vector2 positionsPawns[] = {{2200,120}};
     int pawnsLength = sizeof(positionsPawns)/sizeof(positionsPawns[0]);
     Enemy pawns[2];
     for(int i = 0; i < pawnsLength; i++){
@@ -190,10 +205,12 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     PlayMusicStream(audio.menu);
     SetMusicVolume(audio.menu, 0.1);
     SetMusicVolume(audio.game, 0.1);
+    
+    int playerFrame = 0;
 
     float playerTimer = 0;
-    int playerFrame = 0;
     float platformTimer = 0;
+    float torreTimer = 0;
 
     Camera2D camera = { 0 };
     initiateCamera(&camera, player, screenWidth, screenHeight);
@@ -241,8 +258,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         ClearBackground((Color){ 58, 111, 247, 255 });
                         //DarkBlue{ 0, 82, 172, 255 } Blue{{ 0, 121, 241, 255 }}
 
-                        printf("Posicao x do player: %f\n", player.position.x);
-                        printf("Posicao y do player: %f\n", player.position.y);
+                        // printf("Posicao x do player: %f\n", player.position.x);
+                        // printf("Posicao y do player: %f\n", player.position.y);
 
                         //movimento das plataformas 
                         platformTimer += GetFrameTime();
@@ -268,8 +285,24 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                                 
                             }
                         }
-                        
-                            
+
+                        //hora da torreeeee
+                        torreTimer += GetFrameTime();
+                        //move  o inimigo
+                        if(torreTimer >= 0.02){
+                            torreTimer = 0;
+
+                            if(fabs(player.position.x - torre.rectangle.x) <= 128){
+                                if(player.position.x > torre.rectangle.x && torre.rectangle.x - torre.initialPosition.x < 160){
+                                    torre.direction = 1;
+                                    torre.rectangle.x += torre.direction*torre.speed*deltaTime;
+                                }else if(player.position.x < torre.rectangle.x && torre.rectangle.x - torre.initialPosition.x > -160){
+                                    torre.direction = -1;
+                                    torre.rectangle.x += torre.direction*torre.speed*deltaTime;
+                                }
+                            }
+                        }
+
                         pawnTimer += GetFrameTime();
                         //move  o inimigo
                         if(pawnTimer >= 0.02){
@@ -326,7 +359,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
 
-
                         drawPlayer(&player); //desenha o player
                         //desenha os peoes
                         for(int i = 0; i < pawnsLength; i++){
@@ -339,8 +371,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         for(int i = 0; i < platformsLength; i++){
                             DrawTextureV(platform[i].texture, (Vector2) {platform[i].rectangle.x, platform[i].rectangle.y}, WHITE);
                         }
-                        
 
+                        DrawTextureV(torre.texture, (Vector2){torre.rectangle.x, torre.rectangle.y}, torre.color);
+                        
                         EndMode2D();
                         DrawText(TextFormat("VIDAS: %d", player.vida), 760, 40, 20, RAYWHITE);
                         EndDrawing();
