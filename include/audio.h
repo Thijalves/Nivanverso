@@ -11,6 +11,7 @@ typedef struct{
     Sound jump;
     Sound fall;
     Sound step;
+    Sound enemyDeath;
 } Audio;
 
 void initiateAudio(Audio *audio);

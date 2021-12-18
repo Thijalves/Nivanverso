@@ -6,5 +6,5 @@ void initiateAudio(Audio *audio){
     audio->jump = LoadSound("audio/jump.mp3");
     audio->damage = LoadSound("audio/damage.mp3");    
     audio->select = LoadSound("audio/selection.mp3");
-    
+    audio->enemyDeath = LoadSound("audio/killEnemy.mp3");    
 }

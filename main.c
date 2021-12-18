@@ -494,6 +494,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadSound(audio.jump);
                     UnloadSound(audio.damage);
                     UnloadSound(audio.select);
+                    UnloadSound(audio.enemyDeath);
                     CloseAudioDevice();
                     CloseWindow();
                 }c=0;
@@ -557,6 +558,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadMusicStream(audio.game);
                     UnloadSound(audio.jump);
                     UnloadSound(audio.damage);
+                    UnloadSound(audio.enemyDeath);
                     free(platform);
                     free(rooks);
                     free(pawns);

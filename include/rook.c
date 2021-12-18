@@ -25,8 +25,8 @@ void hitRook(Enemy *rook, Player *player, Audio *audio){
 
         if(player->position.y - rook->rectangle.y < 5){
             rook->isAlive = 0;
+            PlaySound(audio->enemyDeath);
             player->vSpeed = -player->jumpS;
-            PlaySound(audio->jump);
         }else{
             player->vida--;
             if(player->vida != 0) PlaySound(audio->damage);
@@ -34,6 +34,5 @@ void hitRook(Enemy *rook, Player *player, Audio *audio){
             player->vSpeed = -player->jumpS/2;
             player->playerState = 4;
         }
-
     }
 }

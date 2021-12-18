@@ -24,8 +24,8 @@ void hitPawn(Enemy *pawn, Player *player, Audio *audio){
 
         if(player->position.y - pawn->rectangle.y < 5){
             pawn->isAlive = 0;
+            PlaySound(audio->enemyDeath);
             player->vSpeed = -player->jumpS;
-            PlaySound(audio->jump);
         }else{
             player->vida--;
             if(player->vida != 0) PlaySound(audio->damage);
