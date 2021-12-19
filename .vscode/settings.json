@@ -2,6 +2,7 @@
     "files.associations": {
         "*.ejs": "html",
         "initiatecamera.h": "c",
-        "platformstruct.h": "c"
+        "platformstruct.h": "c",
+        "raylib.h": "c"
     }
 }

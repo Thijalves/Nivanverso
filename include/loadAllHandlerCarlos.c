@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "raylib.h"
 
-void loadAll(FILE **file, Texture2D *grassSingle, Texture2D *GrassIntenalEdgeL, Texture2D *lava, Texture2D *dirt, Texture2D *grassWallRight
+void loadAll(FILE **file, Texture2D *backgroundMenu, Texture2D *grassSingle, Texture2D *GrassIntenalEdgeL, Texture2D *lava, Texture2D *dirt, Texture2D *grassWallRight
              ,Texture2D *grassWallLeft, Texture2D *grassEdgeRight, Texture2D *grassEdgeLeft, Texture2D *grass, Texture2D *GrassIntenalEdgeD, Font *font, char **text, char **text2, Texture2D *sky
             , Texture2D *nuvens){
     FILE *mapFile = fopen("./data/fase32.txt","r");
@@ -23,7 +23,9 @@ void loadAll(FILE **file, Texture2D *grassSingle, Texture2D *GrassIntenalEdgeL, 
     nuvens[1] = nuvensHold[1];
     nuvens[2] = nuvensHold[2];
     nuvens[3] = nuvensHold[3];
-    
+
+    Texture2D background = LoadTexture("./textures/backgroundMenu.png");
+    *backgroundMenu = background;
     Texture2D grassAlone = LoadTexture("./textures/tilemap/miolinho.png");
     *grassSingle = grassAlone;
     Texture2D InternalGrass = LoadTexture("./textures/tilemap/subidaE.png");

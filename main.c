@@ -42,11 +42,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     Font font;
     SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
 
-    Texture2D grassSingle, GrassIntenalEdgeL, lava, dirt, grassWallRight, grassWallLeft, grassEdgeRight, grassEdgeLeft, grass, GrassIntenalEdgeD, sky, nuvens[4];
+    Texture2D backgroundMenu, grassSingle, GrassIntenalEdgeL, lava, dirt, grassWallRight, grassWallLeft, grassEdgeRight, grassEdgeLeft, grass, GrassIntenalEdgeD, sky, nuvens[4];
 
-    loadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD,
+    loadAll(&mapFile, &backgroundMenu, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD,
     &font, &text, &text2, &sky, nuvens);
-
 
 
     int mapWidth;
@@ -469,6 +468,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexPlayer(&player);
                     UnloadTexture(navin.sprite.texture);
                     UnloadTexture(nivanocito.sprite.texture);
+                    UnloadTexture(backgroundMenu);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
                     UnloadAudio(&audio);
@@ -510,11 +510,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         }
 
         framesCounter+=3; //a cada frame, (x) letras sao printadas,  quanto maior, mais rapido
-        BeginDrawing();
+        ClearBackground(SKYBLUE);
 
-            ClearBackground(SKYBLUE);
-            DrawTextEx(font, "NIVAN no Nivanverso", (Vector2){175, 100}, 35, 8, YELLOW);
-            DrawTextEx(font, TextSubtext("\nINICIAR - Enter\n CREDITOS - C", 0, framesCounter/5), (Vector2){240, 255}, 35, 8, BLACK);
+        BeginDrawing();
+        DrawTextureV(backgroundMenu, (Vector2){0,0}, RAYWHITE);
+
+            DrawTextEx(font, "NIVAN no Nivanverso", (Vector2){175, 100}, 35, 8, WHITE);
+            DrawTextEx(font, TextSubtext("\nINICIAR - Enter\n CREDITOS - C", 0, framesCounter/5), (Vector2){240, 255}, 35, 8, WHITE);
 
         EndDrawing();
     }
@@ -525,6 +527,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexPlayer(&player);
                     UnloadTexture(navin.sprite.texture);
                     UnloadTexture(nivanocito.sprite.texture);
+                    UnloadTexture(backgroundMenu);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
                     UnloadAudio(&audio);
