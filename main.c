@@ -42,10 +42,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     Font font;
     SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
 
-    Texture2D grassSingle, GrassIntenalEdgeL, lava, dirt, grassWallRight, grassWallLeft, grassEdgeRight, grassEdgeLeft, grass, GrassIntenalEdgeD, sky;
+    Texture2D grassSingle, GrassIntenalEdgeL, lava, dirt, grassWallRight, grassWallLeft, grassEdgeRight, grassEdgeLeft, grass, GrassIntenalEdgeD, sky, nuvens[4];
 
     loadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD,
-    &font, &text, &text2, &sky);
+    &font, &text, &text2, &sky, nuvens);
 
 
 
@@ -180,11 +180,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     int cloudsLength = 300;
 
     Clouds cloud[300] = {0};
-    Texture2D nuvens[4];
-    nuvens[0] = LoadTexture("./textures/nuvempequena.png");
-    nuvens[1] = LoadTexture("./textures/nuvemmedia.png");
-    nuvens[2] = LoadTexture("./textures/nuvemgrande.png");
-    nuvens[3] = LoadTexture("./textures/nuvemenorme.png");
     
     for(int i = 0; i < cloudsLength; i++){
         cloud[i].texture = nuvens[GetRandomValue(0, 3)];
@@ -282,7 +277,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                         BeginDrawing();
                         BeginMode2D(camera);
-                        DrawText("Vidas", GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
                         ClearBackground((Color){ 58, 111, 247, 255 });
 
                         // printf("Posicao x do player: %f\n", player.position.x);
@@ -442,7 +436,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         if(player.vida == 0){
                             UpdateMusicStream(audio.menu);
                             ClearBackground(SKYBLUE);
-                            DrawTextEx(font, "GAME OVER\nMENU - M", (Vector2){175, 100}, 35, 8, RED);
+                            DrawTextEx(font, "GAME OVER\n\n MENU - M", (Vector2){300, 170}, 35, 8, BLACK);
                             if(IsKeyPressed(KEY_M)){
                                 PlaySound(audio.select);
                                 Option = MENU;
@@ -472,29 +466,17 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 if((Option!=MENU && c==0) || IsKeyPressed(KEY_ESCAPE)==1){
                     UnloadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD
                     ,&font, &text, &text2, &sky);
-                    UnloadTexture(player.idle.texture);
-                    UnloadTexture(player.run.texture);
-                    UnloadTexture(player.runLeft.texture);
-                    UnloadTexture(player.falling.texture);
-                    UnloadTexture(player.jumping.texture);
+                    UnloadTexPlayer(&player);
                     UnloadTexture(navin.sprite.texture);
                     UnloadTexture(nivanocito.sprite.texture);
-                    UnloadTexture(nuvens[0]);
-                    UnloadTexture(nuvens[1]);
-                    UnloadTexture(nuvens[2]);
-                    UnloadTexture(nuvens[3]);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
-                    UnloadMusicStream(audio.menu);
-                    UnloadMusicStream(audio.game);
+                    UnloadAudio(&audio);
                     free(platform);
                     free(rooks);
                     free(pawns);
                     free(envItems);
-                    UnloadSound(audio.jump);
-                    UnloadSound(audio.damage);
                     UnloadSound(audio.select);
-                    UnloadSound(audio.enemyDeath);
                     CloseAudioDevice();
                     CloseWindow();
                 }c=0;
@@ -503,19 +485,20 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             case CREDITS:
             {
                 if ("./data/credits.txt" != NULL){
-
+                    framesCounter=0;
                     if (text2){
                         while(1){
+                            framesCounter+=11;
                             UpdateMusicStream(audio.menu);
-                            if(IsKeyPressed(KEY_ESCAPE)){
+                            if(WindowShouldClose()){
                                 Option = MENU;
                                 help = 1;
                                 break;
                             }
                             BeginDrawing();
                             ClearBackground(WHITE);
-                            DrawText(text2, 190, 200, 20, BLUE);
-                            DrawText("ESC - retornar", 400, 250, 20, BLACK);
+                            DrawTextEx(font, TextSubtext(text2, 0, framesCounter/1), (Vector2){290, 0}, 30, 8, BLACK);
+                            DrawText("RETORNAR (ESC) -->", 80, 500, 20, DARKBLUE);
                             EndDrawing();
                         }
                     }
@@ -531,34 +514,20 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
             ClearBackground(SKYBLUE);
             DrawTextEx(font, "NIVAN no Nivanverso", (Vector2){175, 100}, 35, 8, YELLOW);
-            DrawTextEx(font, TextSubtext("INICIAR - Enter\n CREDITOS - C", 0, framesCounter/5), (Vector2){260, 225}, 35, 8, BLACK);
+            DrawTextEx(font, TextSubtext("\nINICIAR - Enter\n CREDITOS - C", 0, framesCounter/5), (Vector2){240, 255}, 35, 8, BLACK);
 
         EndDrawing();
     }
 
-                if(Option!=MENU && c==0){
-
                     UnloadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD
                     ,&font, &text, &text2, &sky);
 
-                    UnloadTexture(player.idle.texture);
-                    UnloadTexture(player.run.texture);
-                    UnloadTexture(player.runLeft.texture);
-                    UnloadTexture(player.falling.texture);
-                    UnloadTexture(player.jumping.texture);
+                    UnloadTexPlayer(&player);
                     UnloadTexture(navin.sprite.texture);
                     UnloadTexture(nivanocito.sprite.texture);
-                    UnloadTexture(nuvens[0]);
-                    UnloadTexture(nuvens[1]);
-                    UnloadTexture(nuvens[2]);
-                    UnloadTexture(nuvens[3]);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
-                    UnloadMusicStream(audio.menu);
-                    UnloadMusicStream(audio.game);
-                    UnloadSound(audio.jump);
-                    UnloadSound(audio.damage);
-                    UnloadSound(audio.enemyDeath);
+                    UnloadAudio(&audio);
                     free(platform);
                     free(rooks);
                     free(pawns);
@@ -566,7 +535,5 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadSound(audio.select);
                     CloseAudioDevice();
                     CloseWindow();
-                }
-
     return 0;
 }

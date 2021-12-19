@@ -8,4 +8,6 @@ void initiatePlayer(Player *player);
 
 void initiateNpc(Npc *npc, Vector2 position);
 
+void UnloadTexPlayer(Player *player);
+
 #endif

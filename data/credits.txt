@@ -1,12 +1,12 @@
-**INFOS SOBRE O GRUPO**
 
-** - Carlos  - **
-** - Camila  - **
-** - Clebson - **
-** - Gabriel - **
-** - Marina  - **
-** - Thiago  - **
-** - Tomás   - **
-** - Yasmin  - **
+  - Carlos                       
+  - Camila                 
+  - Clebson                      
+  - Gabriel          
+  - Marina                        
+  - Thiago            
+  - Tomas                         
+  - Yasmin                                                          
+                                                                
 
-etcc
+

@@ -16,4 +16,6 @@ typedef struct{
 
 void initiateAudio(Audio *audio);
 
+void UnloadAudio(Audio *audio);
+
 #endif

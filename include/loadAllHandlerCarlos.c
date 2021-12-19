@@ -4,7 +4,7 @@
 
 void loadAll(FILE **file, Texture2D *grassSingle, Texture2D *GrassIntenalEdgeL, Texture2D *lava, Texture2D *dirt, Texture2D *grassWallRight
              ,Texture2D *grassWallLeft, Texture2D *grassEdgeRight, Texture2D *grassEdgeLeft, Texture2D *grass, Texture2D *GrassIntenalEdgeD, Font *font, char **text, char **text2, Texture2D *sky
-            ){
+            , Texture2D *nuvens){
     FILE *mapFile = fopen("./data/fase32.txt","r");
     // FILE *mapFile = fopen("./data/faseTeste.txt","r");
     
@@ -12,6 +12,17 @@ void loadAll(FILE **file, Texture2D *grassSingle, Texture2D *GrassIntenalEdgeL, 
         printf("erro ao abrir arquivo\n");
     else
         *file = mapFile;
+
+    Texture2D nuvensHold[4];
+    nuvensHold[0] = LoadTexture("./textures/nuvempequena.png");
+    nuvensHold[1] = LoadTexture("./textures/nuvemmedia.png");
+    nuvensHold[2] = LoadTexture("./textures/nuvemgrande.png");
+    nuvensHold[3] = LoadTexture("./textures/nuvemenorme.png");
+
+    nuvens[0] = nuvensHold[0];
+    nuvens[1] = nuvensHold[1];
+    nuvens[2] = nuvensHold[2];
+    nuvens[3] = nuvensHold[3];
     
     Texture2D grassAlone = LoadTexture("./textures/tilemap/miolinho.png");
     *grassSingle = grassAlone;

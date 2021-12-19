@@ -31,6 +31,8 @@ void initiatePlayer(Player *player){
     //sprite caindo
     player->falling.texture = LoadTexture("./textures/falling.png");
     player->falling.maxFrames = 1;
+
+    
 }
 void initiateNpc(Npc *npc, Vector2 position){
     npc->color = WHITE;
@@ -40,4 +42,12 @@ void initiateNpc(Npc *npc, Vector2 position){
     npc->frame.y = 0.0f;
     npc->frame.width = (float)npc->sprite.texture.width/npc->sprite.maxFrames;
     npc->frame.height = (float)npc->sprite.texture.height;
+}
+
+void UnloadTexPlayer(Player *player){
+    UnloadTexture(player->run.texture);
+    UnloadTexture(player->runLeft.texture);
+    UnloadTexture(player->jumping.texture);
+    UnloadTexture(player->idle.texture);
+    UnloadTexture(player->falling.texture);
 }

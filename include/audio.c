@@ -8,3 +8,12 @@ void initiateAudio(Audio *audio){
     audio->select = LoadSound("audio/selection.mp3");
     audio->enemyDeath = LoadSound("audio/killEnemy.mp3");    
 }
+
+void UnloadAudio(Audio *audio){
+    UnloadMusicStream(audio->menu);
+    UnloadMusicStream(audio->game);
+    UnloadSound(audio->jump);
+    UnloadSound(audio->damage);
+    UnloadSound(audio->select);
+    UnloadSound(audio->enemyDeath);
+}
