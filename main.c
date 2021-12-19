@@ -659,6 +659,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(holmes.sprite.texture);
                     UnloadTexture(holmes.dialogBox);
                     UnloadTexture(life);
+                    UnloadTexture(knight->texture);
                     UnloadTexture(backgroundMenu);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
@@ -722,6 +723,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(life);
                     UnloadTexture(holmes.sprite.texture);
                     UnloadTexture(holmes.dialogBox);
+                    UnloadTexture(knight->texture);
                     UnloadTexture(backgroundMenu);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
