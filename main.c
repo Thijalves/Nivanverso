@@ -651,6 +651,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 if((Option!=MENU && c==0) || IsKeyPressed(KEY_ESCAPE)==1){
                     UnloadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD
                     ,&font, &text, &text2, &sky);
+                    UnloadTexture(sky);
                     UnloadTexPlayer(&player);
                     UnloadTexture(navin.sprite.texture);
                     UnloadTexture(nivanocito.sprite.texture);
