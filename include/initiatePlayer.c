@@ -2,12 +2,12 @@
 
 void initiatePlayer(Player *player){
     player->color = WHITE;
-    player->hSpeed = 500; //era 150
+    player->hSpeed = 150; //era 150
     player->vSpeed = 0;
     player->jumpS = 250;
     player->idle.texture = LoadTexture("./textures/idle.png");
     player->idle.maxFrames = 12;
-    player->position.x = 10;
+    player->position.x = 6500;
     player->position.y = 256;
     player->frame.x = 0.0f;
     player->frame.y = 0.0f;

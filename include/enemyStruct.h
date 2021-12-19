@@ -7,6 +7,8 @@ typedef struct {
     Rectangle rectangle;
     Texture2D texture;
     int speed;
+    int vSpeed;
+    float jumpSpeed;
     char type;
     char isAlive;
     Vector2 initialPosition;

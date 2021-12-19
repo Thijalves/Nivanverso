@@ -18,7 +18,6 @@ void initiateRook(Enemy *rook, Vector2 position){
 }
 
 void hitRook(Enemy *rook, Player *player, Audio *audio){
-
     if(player->position.x + player->frame.width >= rook->rectangle.x &&
         player->position.x <= rook->rectangle.x + rook->rectangle.width &&
         player->position.y >= rook->rectangle.y){

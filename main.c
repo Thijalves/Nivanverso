@@ -14,6 +14,7 @@
 #include "UnloadAllCarlos.h"
 #include "pawn.h"
 #include "rook.h"
+#include "knight.h"
 #include "audio.h"
 #include "platformStruct.h"
 #include "floatingPlatform.h"
@@ -218,6 +219,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     initiatePlayer(&player);
     
+    Vector2 positionsKnigth[] = {{7112, 207}, {8220, 214}};
+    int knightLength = sizeof(positionsKnigth)/sizeof(positionsKnigth[0]);
+    Enemy *knight = (Enemy *)malloc(knightLength * sizeof(Enemy));
+    for(int i = 0; i < knightLength; i++){
+        initiateKnight(&knight[i], positionsKnigth[i]);
+    }
+    
     int cloudsLength = 300;
 
     Clouds cloud[300] = {0};
@@ -227,11 +235,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         generateClouds(&cloud[i]);
     }
     
-    
-    //inicializar plataformas flutuantes 7391 7890
+    //inicializar plataformas flutuantes 
     Vector2 positionsPlatforms[] = {{1680, 256}, {7592, 256}};
     int platformsLength = sizeof(positionsPlatforms)/sizeof(positionsPlatforms[0]);
-    // Platforms platform[2];
     Platforms *platform = (Platforms *)malloc(platformsLength * sizeof(Platforms));
     for(int i = 0; i < platformsLength; i++){
         initiateFloatingPlatform(&platform[i], positionsPlatforms[i]);
@@ -240,7 +246,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     //inicializa as torres 
     Vector2 positionsRooks[] = {{3030, 184}, {4200, 214}, {4870, 248}, {5270, 248}, {8220, 214}};
     int rooksLength = sizeof(positionsRooks)/sizeof(positionsRooks[0]);
-    // Enemy rooks[2];
     Enemy *rooks = (Enemy *)malloc(rooksLength * sizeof(Enemy));
     for(int i = 0; i < rooksLength; i++){
         initiateRook(&rooks[i], positionsRooks[i]);
@@ -249,7 +254,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     //inicializa os peoes 
     Vector2 positionsPawns[] = {{2168,120}, {2800,184}, {3512, 184}, {5070, 248}, {6080, 250}, {6290, 250}};
     int pawnsLength = sizeof(positionsPawns)/sizeof(positionsPawns[0]);
-    // Enemy pawns[2];
     Enemy *pawns = (Enemy *)malloc(pawnsLength * sizeof(Enemy));
     for(int i = 0; i < pawnsLength; i++){
         initiatePawn(&pawns[i], positionsPawns[i]);
@@ -262,25 +266,25 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     PlayMusicStream(audio.game);
     PlayMusicStream(audio.menu);
     SetMusicVolume(audio.menu, 0.1);
-    SetMusicVolume(audio.game, 0.1);
+    SetMusicVolume(audio.game, 0);
     
     int playerFrame = 0;
     int lavaFrame = 0;
 
     float playerTimer = 0;
     float platformTimer = 0;
-    float torreTimer = 0;
+    float rookTimer = 0;
+    float knightTimer = 0;
     float pawnTimer = 0;
     float lavaTimer = 0;
     float cloudTimer = 0;
+    float knightCount = 0;
     float navinY = 0;
     float nivanocitoY = 0;
     float holmesY = 0;
     int pause = 0;
     int intro = 1;
-    int c = 0;
-                           
-
+    int c = 0;             
 
     Camera2D camera = { 0 };
     initiateCamera(&camera, player, screenWidth, screenHeight);
@@ -367,12 +371,50 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
 
-                        //hora da torreeeee
-                        torreTimer += GetFrameTime();
-                        //move  o inimigo
-                        if(torreTimer >= 0.02){
+                        //hora do cavalo
+                        knightTimer += GetFrameTime();
+                        //move o calavo
+                        if(knightTimer >= 0.02){
+                            for(int i = 0; i < knightLength; i++){
+                                knightTimer = 0;
+
+                                if(fabs(player.position.x - knight[i].rectangle.x) <= 64 && !knight[i].dashing){
+                                    knight[i].dashing = 1;
+                                    knightCount = 0; 
+                                }else{
+                                    knight[i].rectangle.y = 207;
+                                }
+
+                                if(knight[i].dashing){
+                            
+                                    knightCount += GetFrameTime();
+                                    //sobe
+                                    knight[i].rectangle.y = 160;
+                                    //vai pra cima
+                                    if(knightCount <= 0.3){
+                                        if(player.position.x > knight[i].rectangle.x && knight[i].rectangle.x - knight[i].initialPosition.x < 128 ){                                    
+                                            knight[i].direction = 1;
+                                            knight[i].rectangle.x += knight[i].direction*knight[i].speed*deltaTime;
+                                        }else if(player.position.x < knight[i].rectangle.x && knight[i].rectangle.x - knight[i].initialPosition.x > -128){
+                                            knight[i].direction = -1;
+                                            knight[i].rectangle.x += knight[i].direction*knight[i].speed*deltaTime;
+                                        }
+                                    }
+                                    //demora pra descer
+                                    if(knightCount >= 0.4){
+                                        knight[i].rectangle.y = 207;
+                                        knight[i].dashing = 0;
+                                    }
+                                }
+                            }
+                        }
+
+                        //hora da torre
+                        rookTimer += GetFrameTime();
+                        //move a torre
+                        if(rookTimer >= 0.02){
                             for(int i = 0; i < rooksLength; i++){
-                                torreTimer = 0;
+                                rookTimer = 0;
                                 if(fabs(player.position.x - rooks[i].rectangle.x) <= 128){
                                     if(player.position.x > rooks[i].rectangle.x && rooks[i].rectangle.x - rooks[i].initialPosition.x < 140){
                                         rooks[i].direction = 1;
@@ -386,7 +428,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         }
 
                         pawnTimer += GetFrameTime();
-                        //move  o inimigo
+                        //move  a torre
                         if(pawnTimer >= 0.02){
                             for(int i = 0; i < pawnsLength; i++){
                                 pawnTimer = 0;
@@ -399,15 +441,24 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
 
+                        //colisao torre
                         for(int i = 0; i < rooksLength; i++){
                             if(rooks[i].isAlive){
                                 hitRook(&rooks[i], &player, &audio);
                             }
                         }
 
+                        //colisao peao
                         for(int i = 0; i < pawnsLength; i++){
                             if(pawns[i].isAlive){
                                 hitPawn(&pawns[i], &player, &audio);
+                            }
+                        }
+
+                        //colisao cavalo
+                        for(int i = 0; i < knightLength; i++){
+                            if(knight[i].isAlive){
+                                hitKnight(&knight[i], &player, &audio);
                             }
                         }
 
@@ -482,6 +533,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }
 
+                        //desenha os cavalos
+                        for(int i = 0; i < knightLength; i++){
+                            if(knight[i].isAlive)
+                                DrawTextureV(knight[i].texture, (Vector2) {knight[i].rectangle.x,knight[i].rectangle.y}, WHITE);
+                            
+                        }
+
                         //desenha a plataforma
                         for(int i = 0; i < platformsLength; i++){
                             DrawTextureV(platform[i].texture, (Vector2) {platform[i].rectangle.x, platform[i].rectangle.y}, WHITE);
@@ -496,9 +554,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         
                         EndMode2D();
                         
-                        for(int i = 0; i < player.vida; i++){
-                            float lifeX = 15 * i;
-                            DrawTextureV(life, (Vector2){760 + lifeX, 40}, WHITE);
+                        if(fabs(player.position.x - navin.position.x) > 96 && fabs(player.position.x - nivanocito.position.x) > 96 && abs(player.position.x - holmes.position.x) > 96){
+                            for(int i = 0; i < player.vida; i++){
+                                float lifeX = 35 * i;
+                                DrawTextureV(life, (Vector2){760 + lifeX, 40}, WHITE);
+                            }
                         }
 
                         if(fabs(player.position.x - navin.position.x) <= 96){
@@ -515,13 +575,30 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         }else holmesY = 0;
 
                         EndDrawing();
-                    }else if(pause == 3){
+                        }else if(pause == 3){
+                        playerTimer += GetFrameTime();
+                        if(playerTimer >= 0.075f){
+                            playerTimer=0;
+                            playerFrame++;
+                        }
+                        playerFrame = playerFrame % player.idle.maxFrames;
+                        player.frame.x = (player.frame.width*playerFrame);
+
+                        //anima os npcs
+                        navin.frame.x = (navin.frame.width*playerFrame);
+                        nivanocito.frame.x = (nivanocito.frame.width*playerFrame);                 
+                        holmes.frame.x = (holmes.frame.width*playerFrame);         
+
                         BeginDrawing();
                             UpdateMusicStream(audio.menu);
                             ClearBackground(SKYBLUE);
                             DrawTextureV(backgroundMenu, (Vector2){0,0}, (Color) {245,245,245,200});
                             DrawTextEx(font, "YOU WINNNNN", (Vector2){260, 170}, 50, 8, BLACK);
                             DrawTextEx(font, "MENU - M\n\n\n SAIR - ESC", (Vector2){340, 280}, 35, 8, BLACK);
+                            DrawTextureRec(holmes.sprite.texture, (Rectangle){holmes.frame.x, holmes.frame.y, -holmes.frame.width, holmes.frame.height}, (Vector2){340, 400}, holmes.color);
+                            DrawTextureRec(navin.sprite.texture, (Rectangle){navin.frame.x, navin.frame.y, -navin.frame.width, navin.frame.height}, (Vector2){340 + navin.frame.width, 400}, navin.color);
+                            DrawTextureRec(nivanocito.sprite.texture, (Rectangle){nivanocito.frame.x, nivanocito.frame.y, -nivanocito.frame.width, nivanocito.frame.height}, (Vector2){340 + (navin.frame.width * 2), 400}, nivanocito.color);
+
                             if(IsKeyPressed(KEY_M)){
                                 PlaySound(audio.select);
                                 Option = MENU;
@@ -589,6 +666,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     free(platform);
                     free(rooks);
                     free(pawns);
+                    free(knight);
                     free(envItems);
                     UnloadSound(audio.select);
                     CloseAudioDevice();
@@ -652,6 +730,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     free(rooks);
                     free(pawns);
                     free(envItems);
+                    free(knight);
                     UnloadSound(audio.select);
                     CloseAudioDevice();
                     CloseWindow();
