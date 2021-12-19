@@ -8,8 +8,8 @@ void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenH
     
     if(player->position.x <= 224){
         x = 225;
-    }else if(player->position.x >= 3424){
-        //x = 3425;
+    }else if(player->position.x >= 9260){
+        x = 9260;
     }else{
         x = player->position.x;
     }

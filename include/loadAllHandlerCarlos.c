@@ -23,7 +23,7 @@ void loadAll(FILE **file, Texture2D *backgroundMenu, Texture2D *grassSingle, Tex
     nuvens[1] = nuvensHold[1];
     nuvens[2] = nuvensHold[2];
     nuvens[3] = nuvensHold[3];
-
+    
     Texture2D background = LoadTexture("./textures/backgroundMenu.png");
     *backgroundMenu = background;
     Texture2D grassAlone = LoadTexture("./textures/tilemap/miolinho.png");

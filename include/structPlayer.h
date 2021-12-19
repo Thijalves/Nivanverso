@@ -33,6 +33,7 @@ typedef struct {
     Vector2 position;
     Sprite sprite;
     Color color;
+    Texture2D dialogBox;
 } Npc;
 
 #endif 

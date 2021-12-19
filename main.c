@@ -47,7 +47,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     loadAll(&mapFile, &backgroundMenu, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD,
     &font, &text, &text2, &sky, nuvens);
 
-
     int mapWidth;
 
     fseek(mapFile, -5, SEEK_END);
@@ -60,7 +59,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     EnvItem *envItems = (EnvItem *) malloc((mapWidth*10) * sizeof(EnvItem));
 
     fseek(mapFile, 0, SEEK_SET);
-
 
     int posx = 0, posy = 0;
     for(int i = 0; i < mapWidth*10; i++){
@@ -168,11 +166,19 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     Player player = {0};
     Npc navin = {0};
     Npc nivanocito = {0};
+    Npc holmes = {0};
     
     nivanocito.sprite.texture = LoadTexture("./textures/nivanocito.png");
+    nivanocito.dialogBox = LoadTexture("./textures/vinanCard.png");
     navin.sprite.texture = LoadTexture("./textures/navin.png");
+    navin.dialogBox = LoadTexture("./textures/navinCard.png");
+    holmes.sprite.texture = LoadTexture("./textures/nivanholmes.png");
+    holmes.dialogBox = LoadTexture("./textures/holmesCard.png");
     initiateNpc(&navin, (Vector2){247, 220});
     initiateNpc(&nivanocito, (Vector2){2650, 61});
+    initiateNpc(&holmes, (Vector2){9080, 61});
+
+    Texture2D hotel =  LoadTexture("./textures/hotel.png");
 
     initiatePlayer(&player);
     
@@ -186,8 +192,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     }
     
     
-    //inicializar plataformas flutuantes 
-    Vector2 positionsPlatforms[] = {{1680,256}};
+    //inicializar plataformas flutuantes 7391 7890
+    Vector2 positionsPlatforms[] = {{1680, 256}, {7592, 256}};
     int platformsLength = sizeof(positionsPlatforms)/sizeof(positionsPlatforms[0]);
     // Platforms platform[2];
     Platforms *platform = (Platforms *)malloc(platformsLength * sizeof(Platforms));
@@ -196,7 +202,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     }
 
     //inicializa as torres 
-    Vector2 positionsRooks[] = {{3030, 184}, {4200, 214}, {4870, 248}, {5270, 248}};
+    Vector2 positionsRooks[] = {{3030, 184}, {4200, 214}, {4870, 248}, {5270, 248}, {8220, 214}};
     int rooksLength = sizeof(positionsRooks)/sizeof(positionsRooks[0]);
     // Enemy rooks[2];
     Enemy *rooks = (Enemy *)malloc(rooksLength * sizeof(Enemy));
@@ -205,7 +211,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     }
 
     //inicializa os peoes 
-    Vector2 positionsPawns[] = {{2200,120}, {2800,184}, {3512, 184}, {5070, 248}};
+    Vector2 positionsPawns[] = {{2200,120}, {2800,184}, {3512, 184}, {5070, 248}, {6080, 250}, {6290, 250}};
     int pawnsLength = sizeof(positionsPawns)/sizeof(positionsPawns[0]);
     // Enemy pawns[2];
     Enemy *pawns = (Enemy *)malloc(pawnsLength * sizeof(Enemy));
@@ -278,8 +284,8 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         BeginMode2D(camera);
                         ClearBackground((Color){ 58, 111, 247, 255 });
 
-                        // printf("Posicao x do player: %f\n", player.position.x);
-                        // printf("Posicao y do player: %f\n", player.position.y);
+                        printf("Posicao x do player: %f\n", player.position.x);
+                        printf("Posicao y do player: %f\n", player.position.y);
 
                         //movimento das plataformas 
                         platformTimer += GetFrameTime();
@@ -359,8 +365,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         playerFrame = playerFrame % player.idle.maxFrames;
                         player.frame.x = (player.frame.width*playerFrame);
 
+                        //anima os npcs
                         navin.frame.x = (navin.frame.width*playerFrame);
                         nivanocito.frame.x = (nivanocito.frame.width*playerFrame);                 
+                        holmes.frame.x = (holmes.frame.width*playerFrame);         
 
                         cloudTimer += GetFrameTime();
                         //move  o inimigo
@@ -376,6 +384,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         for(int i = 0; i < cloudsLength; i++){
                             DrawTextureV(cloud[i].texture, cloud[i].position, WHITE);
                         }
+                        
+                        //desenha o hotel
+                        DrawTextureV(hotel, (Vector2){9192+32*6,  -190}, WHITE);
 
                         for (int i = 0; i < envItemsLength; i++){
                             if(envItems[i].hasTexture){
@@ -422,12 +433,26 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         }
 
 
+                        DrawTextureRec(holmes.sprite.texture, (Rectangle){holmes.frame.x, holmes.frame.y, -holmes.frame.width, holmes.frame.height}, holmes.position, holmes.color);
                         DrawTextureRec(navin.sprite.texture, (Rectangle){navin.frame.x, navin.frame.y, -navin.frame.width, navin.frame.height}, navin.position, navin.color);
                         DrawTextureRec(nivanocito.sprite.texture, (Rectangle){nivanocito.frame.x, nivanocito.frame.y, -nivanocito.frame.width, nivanocito.frame.height}, nivanocito.position, nivanocito.color);
+
                         drawPlayer(&player); //desenha o player
                         
                         EndMode2D();
+                        
                         DrawText(TextFormat("VIDAS: %d", player.vida), 760, 40, 20, RAYWHITE);
+                        
+                        if(fabs(player.position.x - navin.position.x) <= 96){
+                           DrawTextureV(navin.dialogBox, (Vector2){900/2-350, 32}, WHITE); 
+                        }
+                        if(fabs(player.position.x - nivanocito.position.x) <= 96){
+                           DrawTextureV(nivanocito.dialogBox, (Vector2){900/2-350, 32}, WHITE); 
+                        }
+                        if(fabs(player.position.x - holmes.position.x) <= 96){
+                           DrawTextureV(holmes.dialogBox, (Vector2){900/2-350, 32}, WHITE); 
+                        }
+
                         EndDrawing();
                     } else {
                         //jogo pausado
@@ -468,6 +493,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexPlayer(&player);
                     UnloadTexture(navin.sprite.texture);
                     UnloadTexture(nivanocito.sprite.texture);
+                    UnloadTexture(nivanocito.dialogBox);
+                    UnloadTexture(navin.dialogBox);
+                    UnloadTexture(holmes.sprite.texture);
+                    UnloadTexture(holmes.dialogBox);
                     UnloadTexture(backgroundMenu);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
@@ -527,6 +556,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexPlayer(&player);
                     UnloadTexture(navin.sprite.texture);
                     UnloadTexture(nivanocito.sprite.texture);
+                    UnloadTexture(nivanocito.dialogBox);
+                    UnloadTexture(navin.dialogBox);
+                    UnloadTexture(holmes.sprite.texture);
+                    UnloadTexture(holmes.dialogBox);
                     UnloadTexture(backgroundMenu);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
