@@ -2,7 +2,7 @@
 #include "raylib.h"
 
 void generateClouds(Clouds *clouds){
-    int posX = GetRandomValue(-50, 8000);
+    int posX = GetRandomValue(-50, 10000);
     int posY = GetRandomValue(0, 150);
 
     clouds->speed = 5;

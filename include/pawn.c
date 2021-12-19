@@ -12,7 +12,7 @@ void initiatePawn(Enemy *pawn, Vector2 position){
     pawn->rectangle.width = 20;
     pawn->rectangle.height = 40;
     pawn->direction = 1;
-    pawn->speed = 50;
+    pawn->speed = 75;
     pawn->color = ORANGE;
     pawn->isAlive = 1;
 }

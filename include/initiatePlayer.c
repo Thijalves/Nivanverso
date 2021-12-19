@@ -7,7 +7,7 @@ void initiatePlayer(Player *player){
     player->jumpS = 250;
     player->idle.texture = LoadTexture("./textures/idle.png");
     player->idle.maxFrames = 12;
-    player->position.x = 6500;
+    player->position.x = 10;
     player->position.y = 256;
     player->frame.x = 0.0f;
     player->frame.y = 0.0f;

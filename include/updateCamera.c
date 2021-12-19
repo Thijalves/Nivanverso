@@ -15,7 +15,7 @@ void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenH
     }
 
     if(player->position.y <= 128){
-        y = player->position.y-16;
+        y = player->position.y+37;
     }else{
         y = (float)(screenHeight/2-96);
     }

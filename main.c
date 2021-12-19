@@ -219,7 +219,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     initiatePlayer(&player);
     
-    Vector2 positionsKnigth[] = {{7112, 207}, {8220, 214}};
+    Vector2 positionsKnigth[] = {{7142, 207}, {8220, 214}};
     int knightLength = sizeof(positionsKnigth)/sizeof(positionsKnigth[0]);
     Enemy *knight = (Enemy *)malloc(knightLength * sizeof(Enemy));
     for(int i = 0; i < knightLength; i++){
@@ -244,7 +244,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     }
 
     //inicializa as torres 
-    Vector2 positionsRooks[] = {{3030, 184}, {4200, 214}, {4870, 248}, {5270, 248}, {8220, 214}};
+    Vector2 positionsRooks[] = {{3030, 184}, {4200, 214}, {4870, 248}, {5270, 248}};
     int rooksLength = sizeof(positionsRooks)/sizeof(positionsRooks[0]);
     Enemy *rooks = (Enemy *)malloc(rooksLength * sizeof(Enemy));
     for(int i = 0; i < rooksLength; i++){
@@ -252,7 +252,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     }
 
     //inicializa os peoes 
-    Vector2 positionsPawns[] = {{2168,120}, {2800,184}, {3512, 184}, {5070, 248}, {6080, 250}, {6290, 250}};
+    Vector2 positionsPawns[] = {{2168,120}, {2800,184}, {3512, 184}, {5070, 248}, {6080, 250}, {6290, 250}, {8350, 214}};
     int pawnsLength = sizeof(positionsPawns)/sizeof(positionsPawns[0]);
     Enemy *pawns = (Enemy *)malloc(pawnsLength * sizeof(Enemy));
     for(int i = 0; i < pawnsLength; i++){
@@ -324,7 +324,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         BeginDrawing();
                             intro = 0;
                             UpdateMusicStream(audio.game);
-                            ClearBackground(SKYBLUE);
                             DrawTextureV(backgroundMenu, (Vector2){0,0}, (Color) {245,245,245,200});
                             DrawTextEx(font, "INTROOO", (Vector2){260, 170}, 50, 8, BLACK);
                             DrawTextEx(font, "CONTINUAR - (SPACE)", (Vector2){340, 280}, 35, 8, BLACK);
@@ -344,7 +343,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         ClearBackground((Color){ 58, 111, 247, 255 });
 
                         printf("Posicao x do player: %f\n", player.position.x);
-                        printf("Posicao y do player: %f\n", player.position.y);
+                        //printf("Posicao y do player: %f\n", player.position.y);
 
                         //movimento das plataformas 
                         platformTimer += GetFrameTime();
@@ -378,7 +377,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             for(int i = 0; i < knightLength; i++){
                                 knightTimer = 0;
 
-                                if(fabs(player.position.x - knight[i].rectangle.x) <= 64 && !knight[i].dashing){
+                                if(fabs(player.position.x - knight[i].rectangle.x) <= 128 && !knight[i].dashing){
                                     knight[i].dashing = 1;
                                     knightCount = 0; 
                                 }else{
@@ -392,10 +391,10 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                                     knight[i].rectangle.y = 160;
                                     //vai pra cima
                                     if(knightCount <= 0.3){
-                                        if(player.position.x > knight[i].rectangle.x && knight[i].rectangle.x - knight[i].initialPosition.x < 128 ){                                    
+                                        if(player.position.x > knight[i].rectangle.x && knight[i].rectangle.x - knight[i].initialPosition.x < 128+96 ){                                    
                                             knight[i].direction = 1;
                                             knight[i].rectangle.x += knight[i].direction*knight[i].speed*deltaTime;
-                                        }else if(player.position.x < knight[i].rectangle.x && knight[i].rectangle.x - knight[i].initialPosition.x > -128){
+                                        }else if(player.position.x < knight[i].rectangle.x && knight[i].rectangle.x - knight[i].initialPosition.x > -128-96){
                                             knight[i].direction = -1;
                                             knight[i].rectangle.x += knight[i].direction*knight[i].speed*deltaTime;
                                         }
@@ -492,7 +491,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         }
                         
                         //desenha o hotel
-                        DrawTextureV(hotel, (Vector2){9192+32*6,  -190}, WHITE);
+                        DrawTextureV(hotel, (Vector2){9192+32*6,  32}, WHITE);
 
                         for (int i = 0; i < envItemsLength; i++){
                             if(envItems[i].hasTexture){
@@ -573,6 +572,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             if(holmesY < 32) holmesY += 50 * deltaTime;
                             DrawTextureV(holmes.dialogBox, (Vector2){100, holmesY}, WHITE); 
                         }else holmesY = 0;
+                        
 
                         EndDrawing();
                         }else if(pause == 3){
@@ -637,7 +637,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                         }else if(player.vida>0){
                             player.position.y = 100;
-                            if(player.position.x>=160){player.position.x -= 96;}
+                            player.position.x -= 6*32;
                             player.vSpeed = 0;
                             player.playerState = 0;
                             Option = PLAY;
@@ -659,6 +659,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(navin.dialogBox);
                     UnloadTexture(holmes.sprite.texture);
                     UnloadTexture(holmes.dialogBox);
+                    UnloadTexture(life);
+                    UnloadTexture(singleBlock);
+                    UnloadTexture(grassTipR);
+                    UnloadTexture(grassTipL);
+                    UnloadTexture(hotel);
                     UnloadTexture(life);
                     UnloadTexture(knight->texture);
                     UnloadTexture(backgroundMenu);
@@ -715,7 +720,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
                     UnloadAll(&mapFile, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD
                     ,&font, &text, &text2, &sky);
-
                     UnloadTexPlayer(&player);
                     UnloadTexture(navin.sprite.texture);
                     UnloadTexture(nivanocito.sprite.texture);
@@ -726,6 +730,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(holmes.dialogBox);
                     UnloadTexture(knight->texture);
                     UnloadTexture(backgroundMenu);
+                    UnloadTexture(singleBlock);
+                    UnloadTexture(grassTipR);
+                    UnloadTexture(grassTipL);
+                    UnloadTexture(hotel);
+                    UnloadTexture(life);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
                     UnloadAudio(&audio);
