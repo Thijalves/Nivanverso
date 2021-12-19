@@ -46,6 +46,11 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
 
     loadAll(&mapFile, &backgroundMenu, &grassSingle, &GrassIntenalEdgeL, &lava, &dirt, &grassWallRight, &grassWallLeft, &grassEdgeRight, &grassEdgeLeft, &grass, &GrassIntenalEdgeD,
     &font, &text, &text2, &sky, nuvens);
+    Texture2D singleBlock = LoadTexture("./textures/tilemap/miolinho.png");
+    Texture2D grassTipR = LoadTexture("./textures/tilemap/subidaD.png");
+    Texture2D grassTipL = LoadTexture("./textures/tilemap/subidaE.png");
+    Texture2D hotel =  LoadTexture("./textures/hotel.png");
+    Texture2D life =  LoadTexture("./textures/vida.png");
 
     int mapWidth;
 
@@ -103,6 +108,39 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             break;
             case 'r':
                 envItems[i].texture = grassWallRight;
+                envItems[i].color = BROWN;
+                envItems[i].rect.width = 32;
+                envItems[i].rect.height = 32;
+                envItems[i].rect.x = posx;
+                envItems[i].rect.y = posy;
+                envItems[i].hasTexture =1;
+                envItems[i].isLava = 0;
+                break;
+            break;
+            case 'm':
+                envItems[i].texture = singleBlock;
+                envItems[i].color = BROWN;
+                envItems[i].rect.width = 32;
+                envItems[i].rect.height = 32;
+                envItems[i].rect.x = posx;
+                envItems[i].rect.y = posy;
+                envItems[i].hasTexture =1;
+                envItems[i].isLava = 0;
+                break;
+            break;
+            case 'p':
+                envItems[i].texture = grassTipL;
+                envItems[i].color = BROWN;
+                envItems[i].rect.width = 32;
+                envItems[i].rect.height = 32;
+                envItems[i].rect.x = posx;
+                envItems[i].rect.y = posy;
+                envItems[i].hasTexture =1;
+                envItems[i].isLava = 0;
+                break;
+            break;
+            case 't':
+                envItems[i].texture = grassTipR;
                 envItems[i].color = BROWN;
                 envItems[i].rect.width = 32;
                 envItems[i].rect.height = 32;
@@ -178,8 +216,6 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     initiateNpc(&nivanocito, (Vector2){2650, 61});
     initiateNpc(&holmes, (Vector2){9080, 61});
 
-    Texture2D hotel =  LoadTexture("./textures/hotel.png");
-
     initiatePlayer(&player);
     
     int cloudsLength = 300;
@@ -211,13 +247,14 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     }
 
     //inicializa os peoes 
-    Vector2 positionsPawns[] = {{2200,120}, {2800,184}, {3512, 184}, {5070, 248}, {6080, 250}, {6290, 250}};
+    Vector2 positionsPawns[] = {{2168,120}, {2800,184}, {3512, 184}, {5070, 248}, {6080, 250}, {6290, 250}};
     int pawnsLength = sizeof(positionsPawns)/sizeof(positionsPawns[0]);
     // Enemy pawns[2];
     Enemy *pawns = (Enemy *)malloc(pawnsLength * sizeof(Enemy));
     for(int i = 0; i < pawnsLength; i++){
         initiatePawn(&pawns[i], positionsPawns[i]);
     }
+
     //Iniciar audio
     Audio audio;
     InitAudioDevice();
@@ -236,8 +273,13 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
     float pawnTimer = 0;
     float lavaTimer = 0;
     float cloudTimer = 0;
+    float navinY = 0;
+    float nivanocitoY = 0;
+    float holmesY = 0;
     int pause = 0;
+    int intro = 1;
     int c = 0;
+                           
 
 
     Camera2D camera = { 0 };
@@ -254,7 +296,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
             case MENU:
                 UpdateMusicStream(audio.menu);
                 if(IsKeyPressed(KEY_ENTER)){
-                    Option = PLAY; pause = 0;
+                    Option = PLAY; if(intro) pause = 2; else pause = 0;
                     PlaySound(audio.select);
                 } else if(IsKeyPressed(KEY_C)){
                     Option = CREDITS;
@@ -274,7 +316,20 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                 while (!WindowShouldClose()){
                     if(player.playerState == 4) pause = 1, Option = MENU;
 
-                    if(!pause){
+                    if(pause == 2){
+                        BeginDrawing();
+                            intro = 0;
+                            UpdateMusicStream(audio.game);
+                            ClearBackground(SKYBLUE);
+                            DrawTextureV(backgroundMenu, (Vector2){0,0}, (Color) {245,245,245,200});
+                            DrawTextEx(font, "INTROOO", (Vector2){260, 170}, 50, 8, BLACK);
+                            DrawTextEx(font, "CONTINUAR - (SPACE)", (Vector2){340, 280}, 35, 8, BLACK);
+                            if(IsKeyPressed(KEY_SPACE)){
+                                PlaySound(audio.select);
+                                pause = 0;
+                            }
+                        EndDrawing();
+                    }else if(pause == 0){
                         UpdateMusicStream(audio.game);
                         float deltaTime = GetFrameTime();
                         updateCamera(&camera, &player, screenWidth, screenHeight);
@@ -441,26 +496,55 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                         
                         EndMode2D();
                         
-                        DrawText(TextFormat("VIDAS: %d", player.vida), 760, 40, 20, RAYWHITE);
-                        
-                        if(fabs(player.position.x - navin.position.x) <= 96){
-                           DrawTextureV(navin.dialogBox, (Vector2){900/2-350, 32}, WHITE); 
-                        }
-                        if(fabs(player.position.x - nivanocito.position.x) <= 96){
-                           DrawTextureV(nivanocito.dialogBox, (Vector2){900/2-350, 32}, WHITE); 
-                        }
-                        if(fabs(player.position.x - holmes.position.x) <= 96){
-                           DrawTextureV(holmes.dialogBox, (Vector2){900/2-350, 32}, WHITE); 
+                        for(int i = 0; i < player.vida; i++){
+                            float lifeX = 15 * i;
+                            DrawTextureV(life, (Vector2){760 + lifeX, 40}, WHITE);
                         }
 
+                        if(fabs(player.position.x - navin.position.x) <= 96){
+                            if(navinY < 32) navinY += 50 * deltaTime;
+                            DrawTextureV(navin.dialogBox, (Vector2){100, navinY}, WHITE); 
+                        }else navinY = 0;
+                        if(fabs(player.position.x - nivanocito.position.x) <= 96){
+                            if(nivanocitoY < 32) nivanocitoY += 50 * deltaTime;
+                            DrawTextureV(nivanocito.dialogBox, (Vector2){100, nivanocitoY}, WHITE); 
+                        }else nivanocitoY = 0;
+                        if(fabs(player.position.x - holmes.position.x) <= 96){
+                            if(holmesY < 32) holmesY += 50 * deltaTime;
+                            DrawTextureV(holmes.dialogBox, (Vector2){100, holmesY}, WHITE); 
+                        }else holmesY = 0;
+
                         EndDrawing();
-                    } else {
+                    }else if(pause == 3){
+                        BeginDrawing();
+                            UpdateMusicStream(audio.menu);
+                            ClearBackground(SKYBLUE);
+                            DrawTextureV(backgroundMenu, (Vector2){0,0}, (Color) {245,245,245,200});
+                            DrawTextEx(font, "YOU WINNNNN", (Vector2){260, 170}, 50, 8, BLACK);
+                            DrawTextEx(font, "MENU - M\n\n\n SAIR - ESC", (Vector2){340, 280}, 35, 8, BLACK);
+                            if(IsKeyPressed(KEY_M)){
+                                PlaySound(audio.select);
+                                Option = MENU;
+                                initiatePlayer(&player);
+                                for(int i = 0; i < pawnsLength; i++){
+                                    initiatePawn(&pawns[i], positionsPawns[i]);
+                                } 
+                                for(int i = 0; i < rooksLength; i++){
+                                    initiateRook(&rooks[i], positionsRooks[i]);
+                                }player.playerState = 0;
+                                player.vida = 3;
+                                break;
+                            }
+                        EndDrawing();
+                    }else {
                         //jogo pausado
                         BeginDrawing();
                         if(player.vida == 0){
                             UpdateMusicStream(audio.menu);
                             ClearBackground(SKYBLUE);
-                            DrawTextEx(font, "GAME OVER\n\n MENU - M", (Vector2){300, 170}, 35, 8, BLACK);
+                            DrawTextureV(backgroundMenu, (Vector2){0,0}, (Color) {245,245,245,200});
+                            DrawTextEx(font, "GAME OVER", (Vector2){260, 170}, 50, 8, BLACK);
+                            DrawTextEx(font, "MENU - M", (Vector2){340, 280}, 35, 8, BLACK);
                             if(IsKeyPressed(KEY_M)){
                                 PlaySound(audio.select);
                                 Option = MENU;
@@ -497,6 +581,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(navin.dialogBox);
                     UnloadTexture(holmes.sprite.texture);
                     UnloadTexture(holmes.dialogBox);
+                    UnloadTexture(life);
                     UnloadTexture(backgroundMenu);
                     for(int i = 0; i < pawnsLength; i++) UnloadTexture(pawns[i].texture);
                     for(int i = 0; i < platformsLength; i++) UnloadTexture(platform[i].texture);
@@ -526,7 +611,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                             }
                             BeginDrawing();
                             ClearBackground(WHITE);
-                            DrawTextEx(font, TextSubtext(text2, 0, framesCounter/1), (Vector2){290, 0}, 30, 8, BLACK);
+                            DrawTextEx(font, TextSubtext(text2, 0, framesCounter/1), (Vector2){190, 25}, 30, 8, BLACK);
                             DrawText("RETORNAR (ESC) -->", 80, 500, 20, DARKBLUE);
                             EndDrawing();
                         }
@@ -542,11 +627,9 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
         ClearBackground(SKYBLUE);
 
         BeginDrawing();
-        DrawTextureV(backgroundMenu, (Vector2){0,0}, RAYWHITE);
-
-            DrawTextEx(font, "NIVAN no Nivanverso", (Vector2){175, 100}, 35, 8, WHITE);
-            DrawTextEx(font, TextSubtext("\nINICIAR - Enter\n CREDITOS - C", 0, framesCounter/5), (Vector2){240, 255}, 35, 8, WHITE);
-
+            DrawTextureV(backgroundMenu, (Vector2){0,0}, (Color) {245,245,245,200});
+            DrawTextEx(font, "NIVAN no Nivanverso", (Vector2){90, 100}, 45, 8, BLACK);
+            DrawTextEx(font, TextSubtext("\nINICIAR - Enter\n  CREDITOS - C", 0, framesCounter/5), (Vector2){240, 255}, 35, 8, BLACK);
         EndDrawing();
     }
 
@@ -558,6 +641,7 @@ int main(void){   //ao mudar de animacao nos mudamos a largura e altura do frame
                     UnloadTexture(nivanocito.sprite.texture);
                     UnloadTexture(nivanocito.dialogBox);
                     UnloadTexture(navin.dialogBox);
+                    UnloadTexture(life);
                     UnloadTexture(holmes.sprite.texture);
                     UnloadTexture(holmes.dialogBox);
                     UnloadTexture(backgroundMenu);
