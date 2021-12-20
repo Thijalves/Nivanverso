@@ -10,14 +10,14 @@ void initiateKnight(Enemy *knight, Vector2 position){
     knight->rectangle.y = knight->initialPosition.y;
     knight->type = 'k';
     knight->jumpSpeed = 300;
-    knight->speed = 350;
+    knight->speed = 400;
 
 }
 
 void hitKnight(Enemy *knight, Player *player, Audio *audio){
     if( player->position.x + player->frame.width >= knight->rectangle.x &&
         player->position.x <= knight->rectangle.x + knight->rectangle.width &&
-        player->position.y >= knight->rectangle.y && player->position.y-player->frame.height <= knight->rectangle.y+knight->rectangle.height){
+        player->position.y >= knight->rectangle.y && player->position.y - player->frame.height <= knight->rectangle.y + knight->rectangle.height){
 
         if(player->position.y - knight->rectangle.y < 5){
             knight->isAlive = 0;

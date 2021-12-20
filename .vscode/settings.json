@@ -4,6 +4,7 @@
         "initiatecamera.h": "c",
         "platformstruct.h": "c",
         "raylib.h": "c",
-        "rook.h": "c"
+        "rook.h": "c",
+        "drawplayer.h": "c"
     }
 }

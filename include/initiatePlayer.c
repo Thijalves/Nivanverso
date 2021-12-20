@@ -8,7 +8,7 @@ void initiatePlayer(Player *player){
     player->idle.texture = LoadTexture("./textures/idle.png");
     player->idle.maxFrames = 12;
     player->position.x = 10;
-    player->position.y = 256;
+    player->position.y = 192;
     player->frame.x = 0.0f;
     player->frame.y = 0.0f;
     player->facingDirection = 1;

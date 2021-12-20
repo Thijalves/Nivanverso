@@ -6,7 +6,8 @@ void initiateAudio(Audio *audio){
     audio->jump = LoadSound("audio/jump.mp3");
     audio->damage = LoadSound("audio/damage.mp3");    
     audio->select = LoadSound("audio/selection.mp3");
-    audio->enemyDeath = LoadSound("audio/killEnemy.mp3");    
+    audio->enemyDeath = LoadSound("audio/killEnemy.mp3");
+    audio->knightFall = LoadSound("audio/knightFall.mp3");    
 }
 
 void UnloadAudio(Audio *audio){
@@ -16,4 +17,5 @@ void UnloadAudio(Audio *audio){
     UnloadSound(audio->damage);
     UnloadSound(audio->select);
     UnloadSound(audio->enemyDeath);
+    UnloadSound(audio->knightFall);
 }

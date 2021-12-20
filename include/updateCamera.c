@@ -2,7 +2,7 @@
 
 void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenHeight){
 
-    camera->offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2+6};
+    camera->offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2 + 6};
 
     float x, y;
     
@@ -15,9 +15,9 @@ void updateCamera(Camera2D *camera, Player *player, int screenWidth, int screenH
     }
 
     if(player->position.y <= 128){
-        y = player->position.y+37;
+        y = player->position.y + 37;
     }else{
-        y = (float)(screenHeight/2-96);
+        y = (float)(screenHeight/2 - 96);
     }
 
     camera->target = (Vector2){x, y};

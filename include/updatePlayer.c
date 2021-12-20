@@ -8,9 +8,6 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
     int hitFloor = 0;
     int hitWall = 0; // -1=esquerda e 1=direita
 
-    //audio->jump = LoadSound("audio/jump.mp3");
-    //audio->damage = LoadSound("audio/damage.mp3");
-    
     //verifica as colisoes com cada obstaculo
     for (int i = 0; i < envItemsLength; i++){
         if (envItems[i].rect.x <= player->position.x + 15 &&
@@ -18,7 +15,10 @@ void updatePlayer(Player *player, float deltaTime, EnvItem *envItems, int envIte
             envItems[i].rect.y >= player->position.y && 
             envItems[i].rect.y < player->position.y + player->vSpeed*deltaTime){
                 hitFloor = 1;
-                player->vSpeed = 0.0f;
+                if(i == 1775)
+                    player->vSpeed = -player->jumpS*1.3;
+                else
+                    player->vSpeed = 0.0f;
                 player->position.y = envItems[i].rect.y;
                 if(envItems[i].isLava){
                     //mata o player
