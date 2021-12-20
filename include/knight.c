@@ -10,7 +10,7 @@ void initiateKnight(Enemy *knight, Vector2 position){
     knight->rectangle.y = knight->initialPosition.y;
     knight->type = 'k';
     knight->jumpSpeed = 300;
-    knight->speed = 400;
+    knight->speed = 375;
 
 }
 

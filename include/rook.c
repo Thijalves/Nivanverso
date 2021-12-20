@@ -11,7 +11,7 @@ void initiateRook(Enemy *rook, Vector2 position){
     rook->rectangle.width = 20;
     rook->rectangle.height = 42;
     rook->direction = 1;
-    rook->speed = 200;
+    rook->speed = 215;
     rook->type = 't';
     rook->color = WHITE;
     rook->isAlive = 1;
