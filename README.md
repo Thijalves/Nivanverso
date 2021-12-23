@@ -3,7 +3,9 @@ Projeto da disciplina de Introdução à Progarmação do curso de engenharia da
 O jogo foi desenvolvido em C utilizando a biblioteca Raylib (www.Raylib.com).
 
 ## Resumo
-Ajude o professor Nivan a acordar e fugir da discretolândia!
+Ajude o professor Nivan a acordar e fugir da discretolândia!  
+
+![plot](./readmefiles/demo.gif)
 
 ## Nossa Equipe
 
